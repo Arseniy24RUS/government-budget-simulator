@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Региональный KPI-тренажёр 2.0 (Указ Президента № 1014)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #0b63c5;
+            --primary-dark: #084a94;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --border: #dde2eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --error: #b91c1c;
+            --success: #166534;
+            --bad: #b91c1c;
+            --warn: #b45309;
+            --good: #15803d;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: var(--bg);
+            color: var(--text-main);
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        header { margin-bottom: 1rem; }
+        h1 {
+            font-size: 1.4rem;
+            margin: 0 0 0.25rem;
+        }
+        header p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+        }
+        .hidden { display: none; }
+        h2 {
+            font-size: 1.15rem;
+            margin-top: 0;
+        }
+        h3 {
+            font-size: 1rem;
+            margin-top: 0;
+        }
+        .form-row { margin-bottom: 0.75rem; }
+        label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 0.5rem 0.6rem;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        button {
+            display: inline-block;
+            padding: 0.55rem 1rem;
+            border-radius: 999px;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--primary);
+            color: #ffffff;
+        }
+        button:hover:not(:disabled) { background: var(--primary-dark); }
+        button:disabled {
+            background: #9ca3af;
+            cursor: default;
+        }
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        .button-row button { flex: 1 1 150px; }
+        .badge {
+            display: inline-block;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: #e0f2ff;
+            color: #0b63c5;
+        }
+        .stats-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat {
+            flex: 1 1 150px;
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 0.4rem 0.55rem;
+        }
+        .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .stat-value {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .stat-note {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 0.5rem;
+            max-height: 320px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        th, td {
+            border: 1px solid var(--border);
+            padding: 0.3rem 0.35rem;
+        }
+        th {
+            background: #f3f4f6;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        td.num-cell {
+            text-align: right;
+            white-space: nowrap;
+        }
+        td.kpi-name {
+            min-width: 180px;
+        }
+        .kpi-bad { color: var(--bad); font-weight: 600; }
+        .kpi-warn { color: var(--warn); font-weight: 600; }
+        .kpi-good { color: var(--good); font-weight: 600; }
+        .messages {
+            min-height: 1.1rem;
+            margin-top: 0.4rem;
+            font-size: 0.83rem;
+        }
+        .message-error { color: var(--error); }
+        .message-success { color: var(--success); }
+        .resource-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: 0.82rem;
+        }
+        .resource-options label {
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.35rem;
+        }
+        .resource-options input[type="radio"] {
+            margin-top: 0.2rem;
+        }
+        .reforms-grid {
+            display: grid;
+            grid-template-columns: minmax(0,1fr);
+            gap: 0.5rem;
+        }
+        .reform-card {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.6rem;
+            background: #f9fafb;
+        }
+        .reform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+        .reform-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .reform-cost {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+        .reform-body {
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+        .reform-kpi-list {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.2rem;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 220px;
+        }
+        .intro-grid {
+            display: grid;
+            grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
+            gap: 1rem;
+        }
+        .map-grid {
+            display: grid;
+            grid-template-columns: minmax(0,1.2fr) minmax(0,1fr);
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+        .map-card {
+            background: #f9fafb;
+            border-radius: 8px;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+        }
+        .muni-legend {
+            font-size: 0.78rem;
+        }
+        .muni-legend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+        .muni-color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid #9ca3af;
+        }
+        .event-card {
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.5rem 0.6rem;
+            background: #fefce8;
+            font-size: 0.82rem;
+            margin-top: 0.25rem;
+        }
+        .event-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .event-options {
+            margin-top: 0.35rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .event-options label {
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.35rem;
+        }
+        .event-options input[type="radio"] {
+            margin-top: 0.2rem;
+        }
+        .goals-box {
+            margin-top: 0.5rem;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            max-height: 210px;
+            overflow-y: auto;
+        }
+        .goals-box-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        .goals-list label {
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.35rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.2rem;
+        }
+        .goals-list input[type="checkbox"] {
+            margin-top: 0.2rem;
+        }
+        @media (max-width: 767px) {
+            .intro-grid {
+                grid-template-columns: minmax(0,1fr);
+            }
+            .reforms-grid {
+                grid-template-columns: minmax(0,1fr);
+            }
+            .map-grid {
+                grid-template-columns: minmax(0,1fr);
+            }
+        }
+        footer {
+            margin-top: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Региональный KPI-тренажёр 2.0 (Указ Президента РФ № 1014)</h1>
+        <p>Учебная симуляция работы высшего должностного лица субъекта РФ по 21 показателю эффективности в течение двух сроков полномочий.</p>
+    </header>
+
+    <!-- Стартовый экран -->
+    <section id="introSection" class="card">
+        <div class="intro-grid">
+            <div>
+                <h2>Параметры игрока</h2>
+                <div class="form-row">
+                    <label for="fioInput">ФИО</label>
+                    <input type="text" id="fioInput" placeholder="Иванов И.И.">
+                </div>
+                <div class="form-row">
+                    <label for="groupInput">Номер группы</label>
+                    <input type="text" id="groupInput" placeholder="ГГУбд-01-25">
+                </div>
+                <div class="form-row">
+                    <label for="scenarioSelect">Тип региона</label>
+                    <select id="scenarioSelect">
+                        <option value="strong">Регион А — сильный (высокая база, умеренный долг)</option>
+                        <option value="average">Регион B — средний (средние показатели, ограниченный ресурс)</option>
+                        <option value="weak">Регион C — проблемный (низкие показатели, высокая дотационность)</option>
+                    </select>
+                </div>
+
+                <div class="goals-box">
+                    <div class="goals-box-title">Стратегические цели (выберите до трёх показателей)</div>
+                    <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0; margin-bottom:0.25rem;">
+                        Это ваши личные ориентиры как руководителя региона. В финале симуляции вы получите отдельную оценку
+                        по их достижению.
+                    </p>
+                    <div id="goalsContainer" class="goals-list"></div>
+                </div>
+
+                <div class="form-row" style="margin-top:0.6rem;">
+                    <button id="startGameBtn">Начать симуляцию</button>
+                </div>
+            </div>
+            <div>
+                <h3>Как работает версия 2.0</h3>
+                <p style="font-size:0.85rem; line-height:1.4;">
+                    Вы играете роль высшего должностного лица субъекта РФ. В течение двух сроков (10 условных лет)
+                    вы управляете регионом по 21 показателю Указа Президента РФ № 1014: от доверия к власти и демографии
+                    до инвестиций, доходов и цифровой зрелости.
+                </p>
+                <p style="font-size:0.85rem; line-height:1.4;">
+                    Каждый год вы сначала анализируете дашборд региона (21 показатель, агрегированные индексы и карту
+                    муниципалитетов), затем выбираете ресурсную стратегию (налоги, заимствования, экономия),
+                    определяете ключевые реформы и реагируете на событие года. После этого наблюдаете изменения
+                    показателей, долга и доверия.
+                </p>
+                <p style="font-size:0.8rem; color:var(--text-muted);">
+                    Значения показателей заданы как индексы достижения цели (0–100): 0 означает отсутствие достижения,
+                    100 — устойчивое выполнение целевого ориентира.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Игровой экран -->
+    <section id="gameSection" class="card hidden">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+            <div>
+                <h2 style="margin-bottom:0.15rem;">Год: <span id="yearLabel"></span> (срок: <span id="termLabel"></span>)</h2>
+                <div style="font-size:0.8rem; color:var(--text-muted);">
+                    Игрок: <span id="playerLabel"></span>,
+                    регион: <span id="scenarioLabel" class="badge"></span>
+                </div>
+            </div>
+            <div style="text-align:right; font-size:0.8rem; color:var(--text-muted);">
+                Ход <span id="roundIndexLabel"></span> / <span id="roundTotalLabel"></span>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-label">Базовый ресурс реформ, усл. ед.</div>
+                <div class="stat-value" id="baseResourceStat"></div>
+                <div class="stat-note">Совокупность налоговых доходов, трансфертов и возможностей заимствования.</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Ресурс реформ в этом году, усл. ед.</div>
+                <div class="stat-value" id="availableResourceStat"></div>
+                <div class="stat-note">Определяется выбранной ресурсной стратегией.</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Госдолг региона, % к доходам</div>
+                <div class="stat-value" id="debtStat"></div>
+                <div class="stat-note">Чем выше долг, тем выше риски для устойчивости и доверия.</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Индекс доверия к власти</div>
+                <div class="stat-value" id="trustStat"></div>
+                <div class="stat-note">Показатель № 1 Указа: ключевая итоговая оценка граждан.</div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Социально-демографический блок (ср. индекс)</div>
+                <div class="stat-value" id="socialIndexStat"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Городская среда и инфраструктура (ср. индекс)</div>
+                <div class="stat-value" id="infraIndexStat"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Экономика и доходы (ср. индекс)</div>
+                <div class="stat-value" id="economyIndexStat"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Цифровое развитие (ср. индекс)</div>
+                <div class="stat-value" id="digitalIndexStat"></div>
+            </div>
+        </div>
+
+        <p style="font-size:0.83rem; color:var(--text-muted); margin:0.4rem 0 0.2rem;">
+            Сначала проанализируйте показатели и карту муниципалитетов, затем определите ресурсную стратегию,
+            реформы и реакцию на событие года.
+        </p>
+
+        <!-- Таблица KPI -->
+        <h3 style="font-size:0.95rem; margin-top:0.6rem;">Показатели Указа Президента РФ № 1014</h3>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width:2rem;">№</th>
+                        <th>Показатель</th>
+                        <th class="num-cell">Индекс достижения (0–100)</th>
+                        <th class="num-cell">Изменение за год</th>
+                    </tr>
+                </thead>
+                <tbody id="kpiTableBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Карта муниципалитетов и мини-дашборд -->
+        <div class="map-grid">
+            <div class="map-card">
+                <h3 style="font-size:0.95rem; margin-top:0;">Карта муниципалитетов (условная)</h3>
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">
+                    Цвет показывает интегральный индекс развития территории (от красного к зелёному).
+                    Границы условные, но типы территорий типичны для субъекта РФ.
+                </p>
+                <svg id="muniMap" viewBox="0 0 200 120" style="width:100%; height:auto; border-radius:8px; border:1px solid var(--border); background:#e5e7eb;">
+                    <polygon id="poly_capital" points="10,10 95,10 95,55 10,55" stroke="#111827" stroke-width="1" fill="#cccccc"></polygon>
+                    <polygon id="poly_agglom" points="105,10 190,10 190,55 105,55" stroke="#111827" stroke-width="1" fill="#cccccc"></polygon>
+                    <polygon id="poly_mono" points="10,65 120,65 120,110 10,110" stroke="#111827" stroke-width="1" fill="#cccccc"></polygon>
+                    <polygon id="poly_rural" points="130,65 190,65 190,110 130,110" stroke="#111827" stroke-width="1" fill="#cccccc"></polygon>
+                    <text x="52" y="35" text-anchor="middle" font-size="9" fill="#111827">Столица</text>
+                    <text x="147" y="35" text-anchor="middle" font-size="9" fill="#111827">Агломерация</text>
+                    <text x="65" y="92" text-anchor="middle" font-size="9" fill="#111827">Моногород</text>
+                    <text x="160" y="92" text-anchor="middle" font-size="9" fill="#111827">Сельские районы</text>
+                </svg>
+            </div>
+            <div class="map-card">
+                <h3 style="font-size:0.95rem; margin-top:0;">Индексы развития зон</h3>
+                <div class="muni-legend">
+                    <div class="muni-legend-item">
+                        <div>
+                            Столица региона<br>
+                            <span id="muniCapitalScore" style="font-size:0.78rem; color:var(--text-muted);"></span>
+                        </div>
+                        <div class="muni-color-box" id="muniCapitalColor"></div>
+                    </div>
+                    <div class="muni-legend-item">
+                        <div>
+                            Крупная агломерация<br>
+                            <span id="muniAgglomScore" style="font-size:0.78rem; color:var(--text-muted);"></span>
+                        </div>
+                        <div class="muni-color-box" id="muniAgglomColor"></div>
+                    </div>
+                    <div class="muni-legend-item">
+                        <div>
+                            Моногород<br>
+                            <span id="muniMonoScore" style="font-size:0.78rem; color:var(--text-muted);"></span>
+                        </div>
+                        <div class="muni-color-box" id="muniMonoColor"></div>
+                    </div>
+                    <div class="muni-legend-item">
+                        <div>
+                            Сельские районы<br>
+                            <span id="muniRuralScore" style="font-size:0.78rem; color:var(--text-muted);"></span>
+                        </div>
+                        <div class="muni-color-box" id="muniRuralColor"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ресурсная стратегия -->
+        <h3 style="font-size:0.95rem; margin-top:0.8rem;">Шаг 1. Ресурсная стратегия на год</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin:0 0 0.3rem;">
+            Определите, как вы формируете ресурс для реформ: за счёт изменения налогов, заимствований, экономии расходов
+            и работы с федеральным центром.
+        </p>
+        <div class="resource-options" id="resourceOptionsContainer">
+        </div>
+        <p style="font-size:0.8rem; margin-top:0.25rem;">
+            При выбранной стратегии ресурс реформ на этот год: <strong><span id="resourcePreview"></span> усл. ед.</strong>
+        </p>
+
+        <!-- Реформы -->
+        <h3 style="font-size:0.95rem; margin-top:0.8rem;">Шаг 2. Ключевые реформы (программы)</h3>
+        <p style="font-size:0.8rem; color:var(--text-muted); margin:0 0 0.3rem;">
+            Выберите несколько реформ, не превышая доступный ресурс. Каждая программа влияет на группу показателей
+            (демография, здоровье, образование, городская среда, экономика, цифровизация и др.).
+        </p>
+        <div class="reforms-grid" id="reformsContainer">
+        </div>
+
+        <!-- Событие года -->
+        <h3 style="font-size:0.95rem; margin-top:0.8rem;">Шаг 3. Событие года</h3>
+        <div id="eventContainer" class="event-card">
+        </div>
+
+        <div class="messages" id="gameMessage"></div>
+
+        <div class="button-row">
+            <button id="applyYearBtn">Применить решения за год</button>
+            <button id="nextYearBtn" disabled>Следующий год</button>
+            <button id="resetGameBtn" type="button" style="background:#6b7280;">Начать заново</button>
+        </div>
+    </section>
+
+    <!-- Графики -->
+    <section id="chartsSection" class="card hidden">
+        <h2>Динамика агрегированных показателей</h2>
+        <p style="font-size:0.8rem; color:var(--text-muted);">
+            Для наглядности 21 показатель сгруппирован в четыре блока: социально-демографический,
+            городская среда и инфраструктура, экономика и доходы, цифровое развитие.
+            Значения — средние индексы достижения цели по группе.
+        </p>
+        <div class="charts-grid">
+            <div>
+                <h3 style="font-size:0.95rem;">Социальный блок и человеческий капитал</h3>
+                <div class="chart-container">
+                    <canvas id="socialChart"></canvas>
+                </div>
+            </div>
+            <div>
+                <h3 style="font-size:0.95rem;">Экономика, инфраструктура и цифровое развитие</h3>
+                <div class="chart-container">
+                    <canvas id="econChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Итоги -->
+    <section id="summarySection" class="card hidden">
+        <h2>Итоговая оценка вашей деятельности</h2>
+        <p style="font-size:0.9rem;">
+            <strong>Игрок:</strong> <span id="summaryPlayer"></span><br>
+            <strong>Регион:</strong> <span id="summaryScenario"></span>
+        </p>
+
+        <div class="stats-grid">
+            <div class="stat">
+                <div class="stat-label">Интегральный индекс по 21 показателю (0–100)</div>
+                <div class="stat-value" id="scoreKpi"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Финансовая устойчивость (0–100)</div>
+                <div class="stat-value" id="scoreFinance"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Доверие к власти (индекс 1)</div>
+                <div class="stat-value" id="scoreTrust"></div>
+            </div>
+            <div class="stat">
+                <div class="stat-label">Итоговая оценка эффективности (0–100)</div>
+                <div class="stat-value" id="scoreTotal"></div>
+            </div>
+        </div>
+
+        <div id="goalsSummary" style="margin-top:0.5rem; font-size:0.85rem;"></div>
+        <div id="profileSummary" style="margin-top:0.45rem; font-size:0.85rem;"></div>
+
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.4rem;">
+            Итоговая оценка — условная модель позиции региона в докладе по Указу Президента РФ № 1014.
+            Высокое значение требует одновременно достойных значений KPI, устойчивых финансов и приемлемого уровня доверия.
+        </p>
+    </section>
+
+    <footer>
+        © Региональный KPI-тренажёр 2.0. Учебный прототип для курса «Введение в специальность ГМУ».
+    </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const YEARS = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034, 2035];
+
+const INDICATORS = [
+    { id: "ind1_trust", idx: 1, name: "Доверие к власти", group: "social" },
+    { id: "ind2_population", idx: 2, name: "Численность населения субъекта РФ (индекс достижения)", group: "social" },
+    { id: "ind3_tfr", idx: 3, name: "Суммарный коэффициент рождаемости (индекс достижения)", group: "social" },
+    { id: "ind4_life", idx: 4, name: "Ожидаемая продолжительность жизни при рождении (индекс достижения)", group: "social" },
+    { id: "ind5_poverty", idx: 5, name: "Индекс снижения уровня бедности", group: "social" },
+    { id: "ind6_sport", idx: 6, name: "Удовлетворенность условиями для занятий физкультурой и спортом", group: "social" },
+    { id: "ind7_svo", idx: 7, name: "Удовлетворенность участников СВО условиями реабилитации, переобучения и трудоустройства", group: "social" },
+    { id: "ind8_education", idx: 8, name: "Уровень образования (индекс достижения)", group: "social" },
+    { id: "ind9_talent", idx: 9, name: "Эффективность системы работы с талантами детей и молодежи", group: "social" },
+    { id: "ind10_volunteers", idx: 10, name: "Доля людей, вовлеченных в добровольческую деятельность (индекс)", group: "social" },
+    { id: "ind11_upbringing", idx: 11, name: "Условия для воспитания гармонично развитой, патриотичной и социальной ответственной личности", group: "social" },
+    { id: "ind12_housingFamilies", idx: 12, name: "Количество семей, улучшивших жилищные условия (индекс достижения цели)", group: "infra" },
+    { id: "ind13_construction", idx: 13, name: "Объем ввода в эксплуатацию жилой и нежилой недвижимости (индекс)", group: "infra" },
+    { id: "ind14_urbanEnv", idx: 14, name: "Качество среды для жизни в опорных населенных пунктах", group: "infra" },
+    { id: "ind15_roads", idx: 15, name: "Доля автомобильных дорог, соответствующих нормативам", group: "infra" },
+    { id: "ind16_transport", idx: 16, name: "Доля парка общественного транспорта не старше нормативного", group: "infra" },
+    { id: "ind17_environment", idx: 17, name: "Качество окружающей среды", group: "infra" },
+    { id: "ind18_income", idx: 18, name: "Темп роста реального среднедушевого денежного дохода населения (индекс достижения)", group: "economy" },
+    { id: "ind19_invest", idx: 19, name: "Темп роста инвестиций в основной капитал (индекс достижения)", group: "economy" },
+    { id: "ind20_smeIncome", idx: 20, name: "Темп роста дохода на одного работника МСП (индекс достижения)", group: "economy" },
+    { id: "ind21_digital", idx: 21, name: "\"Цифровая зрелость\" государственного и муниципального управления и ключевых отраслей", group: "digital" }
+];
+
+const SCENARIOS = {
+    strong: {
+        key: "strong",
+        name: "Регион А — сильный",
+        description: "Высокая стартовая база, умеренный долг, хороший ресурс для реформ.",
+        baseResource: 6,
+        baseDebt: 20,
+        baseIndicators: {
+            ind1_trust: 60,
+            ind2_population: 62,
+            ind3_tfr: 58,
+            ind4_life: 72,
+            ind5_poverty: 65,
+            ind6_sport: 60,
+            ind7_svo: 60,
+            ind8_education: 70,
+            ind9_talent: 66,
+            ind10_volunteers: 55,
+            ind11_upbringing: 62,
+            ind12_housingFamilies: 60,
+            ind13_construction: 63,
+            ind14_urbanEnv: 68,
+            ind15_roads: 70,
+            ind16_transport: 62,
+            ind17_environment: 65,
+            ind18_income: 60,
+            ind19_invest: 62,
+            ind20_smeIncome: 58,
+            ind21_digital: 65
+        }
+    },
+    average: {
+        key: "average",
+        name: "Регион B — средний",
+        description: "Средние показатели по большинству направлений, ограниченный ресурс реформ, долг ближе к верхней границе.",
+        baseResource: 5,
+        baseDebt: 30,
+        baseIndicators: {
+            ind1_trust: 52,
+            ind2_population: 55,
+            ind3_tfr: 52,
+            ind4_life: 68,
+            ind5_poverty: 55,
+            ind6_sport: 50,
+            ind7_svo: 52,
+            ind8_education: 60,
+            ind9_talent: 55,
+            ind10_volunteers: 48,
+            ind11_upbringing: 52,
+            ind12_housingFamilies: 50,
+            ind13_construction: 52,
+            ind14_urbanEnv: 54,
+            ind15_roads: 52,
+            ind16_transport: 48,
+            ind17_environment: 55,
+            ind18_income: 52,
+            ind19_invest: 50,
+            ind20_smeIncome: 50,
+            ind21_digital: 52
+        }
+    },
+    weak: {
+        key: "weak",
+        name: "Регион C — проблемный",
+        description: "Низкие значения по ряду показателей, значительная дотационность и высокий долг.",
+        baseResource: 4,
+        baseDebt: 45,
+        baseIndicators: {
+            ind1_trust: 45,
+            ind2_population: 48,
+            ind3_tfr: 45,
+            ind4_life: 63,
+            ind5_poverty: 45,
+            ind6_sport: 40,
+            ind7_svo: 42,
+            ind8_education: 52,
+            ind9_talent: 48,
+            ind10_volunteers: 40,
+            ind11_upbringing: 45,
+            ind12_housingFamilies: 42,
+            ind13_construction: 45,
+            ind14_urbanEnv: 46,
+            ind15_roads: 42,
+            ind16_transport: 38,
+            ind17_environment: 48,
+            ind18_income: 45,
+            ind19_invest: 42,
+            ind20_smeIncome: 42,
+            ind21_digital: 45
+        }
+    }
+};
+
+const RESOURCE_OPTIONS = [
+    {
+        key: "conservative",
+        label: "Сохранить текущую налоговую и долговую политику",
+        description: "Без существенного повышения налогов и долга. Умеренный ресурс реформ, нейтральное влияние на доверие и доходы.",
+        resourceDelta: 0,
+        debtDelta: 0,
+        trustDelta: 0,
+        incomeDelta: 0
+    },
+    {
+        key: "tax_up_moderate",
+        label: "Умеренно повысить налоги и активнее привлекать федеральные средства",
+        description: "Дополнительный ресурс реформ за счёт налогов и федеральной поддержки. Некоторое снижение доверия и реальных доходов, небольшой рост долга.",
+        resourceDelta: 2,
+        debtDelta: 5,
+        trustDelta: -2,
+        incomeDelta: -2
+    },
+    {
+        key: "tax_up_strong",
+        label: "Существенно повысить налоги и увеличить заимствования",
+        description: "Максимальный ресурс реформ, но заметное снижение доверия и реальных доходов, значительный рост долга.",
+        resourceDelta: 3,
+        debtDelta: 10,
+        trustDelta: -4,
+        incomeDelta: -4
+    },
+    {
+        key: "tax_down_austerity",
+        label: "Снизить налоги и провести жёсткую оптимизацию расходов",
+        description: "Поддержка доходов населения и частично доверия, сокращение долга. Ресурс реформ ограничен.",
+        resourceDelta: -1,
+        debtDelta: -5,
+        trustDelta: 2,
+        incomeDelta: 3
+    }
+];
+
+const REFORMS = [
+    {
+        key: "family",
+        name: "Программа «Семья и демография»",
+        cost: 2,
+        description: "Поддержка рождения детей, многодетных семей, региональный материнский капитал, жильё для семей.",
+        affects: [1,2,3,4,5,12,13,11],
+        effects: {
+            ind1_trust: 1.5,
+            ind2_population: 1.0,
+            ind3_tfr: 4.0,
+            ind4_life: 1.0,
+            ind5_poverty: 2.0,
+            ind11_upbringing: 1.5,
+            ind12_housingFamilies: 3.0,
+            ind13_construction: 1.5
+        }
+    },
+    {
+        key: "health_svo",
+        name: "Здравоохранение и реабилитация участников СВО",
+        cost: 2,
+        description: "Модернизация первичного звена, реабилитационные центры, поддержка семей участников СВО.",
+        affects: [1,4,5,7,17],
+        effects: {
+            ind1_trust: 2.0,
+            ind4_life: 3.0,
+            ind5_poverty: 1.0,
+            ind7_svo: 5.0,
+            ind17_environment: 1.0
+        }
+    },
+    {
+        key: "education_youth",
+        name: "Образование, молодёжь, таланты и добровольчество",
+        cost: 2,
+        description: "Школы, колледжи, кружки, олимпиадное движение, добровольчество и проектная деятельность молодёжи.",
+        affects: [1,8,9,10,11,6],
+        effects: {
+            ind1_trust: 1.0,
+            ind6_sport: 1.0,
+            ind8_education: 4.0,
+            ind9_talent: 4.0,
+            ind10_volunteers: 3.0,
+            ind11_upbringing: 3.0
+        }
+    },
+    {
+        key: "sport_culture",
+        name: "Спорт, культура, патриотическое воспитание",
+        cost: 1,
+        description: "Дворовый спорт, ФОКи, культурные центры, мероприятия патриотического воспитания.",
+        affects: [1,6,10,11,14],
+        effects: {
+            ind1_trust: 1.0,
+            ind6_sport: 4.0,
+            ind10_volunteers: 1.5,
+            ind11_upbringing: 2.0,
+            ind14_urbanEnv: 1.0
+        }
+    },
+    {
+        key: "urban_infra_transport",
+        name: "Городская среда, жильё, дороги и транспорт",
+        cost: 3,
+        description: "Благоустройство, ремонт дворов, дороги, общественный транспорт, развитие опорных населённых пунктов.",
+        affects: [12,13,14,15,16,17,1],
+        effects: {
+            ind1_trust: 1.5,
+            ind12_housingFamilies: 2.0,
+            ind13_construction: 3.0,
+            ind14_urbanEnv: 3.0,
+            ind15_roads: 3.0,
+            ind16_transport: 3.0,
+            ind17_environment: 2.0
+        }
+    },
+    {
+        key: "economy_invest_sme",
+        name: "Экономика, инвестиции и малый бизнес",
+        cost: 3,
+        description: "Инвестиционные проекты, промышленная политика, поддержка МСП, улучшение делового климата.",
+        affects: [1,5,18,19,20,2],
+        effects: {
+            ind1_trust: 1.0,
+            ind2_population: 1.0,
+            ind5_poverty: 3.0,
+            ind18_income: 3.0,
+            ind19_invest: 4.0,
+            ind20_smeIncome: 4.0
+        }
+    },
+    {
+        key: "digital_governance",
+        name: "Цифровой регион и госуправление",
+        cost: 2,
+        description: "Цифровые госуслуги, платформенные решения в образовании, здравоохранении и экономике.",
+        affects: [1,4,8,9,18,21],
+        effects: {
+            ind1_trust: 2.0,
+            ind4_life: 1.0,
+            ind8_education: 1.5,
+            ind9_talent: 1.0,
+            ind18_income: 1.0,
+            ind21_digital: 5.0
+        }
+    }
+];
+
+const MUNICIPAL_ZONES = {
+    capital: {
+        key: "capital",
+        name: "Столица региона",
+        weights: { social: 0.3, infra: 0.2, economy: 0.3, digital: 0.2 }
+    },
+    agglom: {
+        key: "agglom",
+        name: "Крупная агломерация",
+        weights: { social: 0.25, infra: 0.3, economy: 0.3, digital: 0.15 }
+    },
+    mono: {
+        key: "mono",
+        name: "Моногород",
+        weights: { social: 0.15, infra: 0.35, economy: 0.4, digital: 0.1 }
+    },
+    rural: {
+        key: "rural",
+        name: "Сельские районы",
+        weights: { social: 0.4, infra: 0.4, economy: 0.1, digital: 0.1 }
+    }
+};
+
+const EVENTS = [
+    {
+        key: "mono_crisis",
+        title: "Кризис в моногороде",
+        description: "Крупный работодатель в моногороде объявляет о сокращении производства. Растёт риск безработицы и оттока населения.",
+        options: [
+            {
+                key: "support_program",
+                label: "Запустить программу поддержки моногорода (софинансирование модернизации и переподготовка кадров).",
+                effects: {
+                    indicators: {
+                        ind2_population: 1.5,
+                        ind5_poverty: 2.0,
+                        ind18_income: 2.0,
+                        ind19_invest: 1.5,
+                        ind1_trust: 2.0
+                    },
+                    debtDelta: 5,
+                    trustDelta: 1
+                }
+            },
+            {
+                key: "partial_support",
+                label: "Ограничиться точечными мерами поддержки без масштабной программы.",
+                effects: {
+                    indicators: {
+                        ind5_poverty: 1.0,
+                        ind18_income: 0.5,
+                        ind1_trust: -0.5
+                    },
+                    debtDelta: 1,
+                    trustDelta: -1
+                }
+            },
+            {
+                key: "market_solution",
+                label: "Положиться на рыночные механизмы и поддержку федерального центра.",
+                effects: {
+                    indicators: {
+                        ind5_poverty: -2.0,
+                        ind2_population: -1.0,
+                        ind1_trust: -2.0
+                    },
+                    debtDelta: 0,
+                    trustDelta: -2
+                }
+            }
+        ]
+    },
+    {
+        key: "eco_conflict",
+        title: "Экологический конфликт",
+        description: "Жители протестуют против загрязнения окружающей среды и требуют закрытия или модернизации предприятий-загрязнителей.",
+        options: [
+            {
+                key: "hard_ecology",
+                label: "Ввести жёсткие экологические требования, поддержав модернизацию предприятий.",
+                effects: {
+                    indicators: {
+                        ind17_environment: 4.0,
+                        ind1_trust: 2.0,
+                        ind19_invest: -1.0,
+                        ind18_income: -1.0
+                    },
+                    debtDelta: 3,
+                    trustDelta: 1
+                }
+            },
+            {
+                key: "balance",
+                label: "Поэтапная модернизация с учётом интересов бизнеса и жителей.",
+                effects: {
+                    indicators: {
+                        ind17_environment: 2.0,
+                        ind1_trust: 1.0
+                    },
+                    debtDelta: 1,
+                    trustDelta: 0
+                }
+            },
+            {
+                key: "ignore",
+                label: "Сохранить статус-кво, ограничившись информационной кампанией.",
+                effects: {
+                    indicators: {
+                        ind17_environment: -2.0,
+                        ind1_trust: -3.0
+                    },
+                    debtDelta: 0,
+                    trustDelta: -2
+                }
+            }
+        ]
+    },
+    {
+        key: "big_investor",
+        title: "Крупный инвестор",
+        description: "В регион готов зайти крупный инвестор с проектом промышленного кластера.",
+        options: [
+            {
+                key: "tax_benefits",
+                label: "Предоставить существенные налоговые льготы и инфраструктурную поддержку.",
+                effects: {
+                    indicators: {
+                        ind19_invest: 5.0,
+                        ind18_income: 3.0,
+                        ind20_smeIncome: 3.0,
+                        ind2_population: 1.5
+                    },
+                    debtDelta: 4,
+                    trustDelta: 1
+                }
+            },
+            {
+                key: "moderate_support",
+                label: "Предложить умеренные льготы при сохранении стабильных поступлений в бюджет.",
+                effects: {
+                    indicators: {
+                        ind19_invest: 3.0,
+                        ind18_income: 2.0,
+                        ind20_smeIncome: 2.0
+                    },
+                    debtDelta: 1,
+                    trustDelta: 0
+                }
+            },
+            {
+                key: "strict_conditions",
+                label: "Сделать упор на фискальные интересы региона, сократив объём льгот.",
+                effects: {
+                    indicators: {
+                        ind19_invest: 1.0,
+                        ind18_income: 1.0,
+                        ind1_trust: -1.0
+                    },
+                    debtDelta: 0,
+                    trustDelta: -1
+                }
+            }
+        ]
+    },
+    {
+        key: "federal_digital",
+        title: "Федеральная программа цифровизации",
+        description: "Федеральный центр предлагает региону стать пилотной площадкой по цифровизации госуправления и социальной сферы.",
+        options: [
+            {
+                key: "full_participation",
+                label: "Активно войти в программу, инвестируя в инфраструктуру и кадры.",
+                effects: {
+                    indicators: {
+                        ind21_digital: 6.0,
+                        ind8_education: 2.0,
+                        ind9_talent: 1.5,
+                        ind4_life: 1.0,
+                        ind1_trust: 2.0
+                    },
+                    debtDelta: 3,
+                    trustDelta: 1
+                }
+            },
+            {
+                key: "limited",
+                label: "Войти в программу ограниченно, сосредоточившись на ключевых сервисах.",
+                effects: {
+                    indicators: {
+                        ind21_digital: 3.0,
+                        ind1_trust: 1.0
+                    },
+                    debtDelta: 1,
+                    trustDelta: 0
+                }
+            },
+            {
+                key: "decline",
+                label: "Отказаться от пилотного статуса, сославшись на нехватку ресурсов.",
+                effects: {
+                    indicators: {
+                        ind21_digital: -1.0,
+                        ind1_trust: -1.0
+                    },
+                    debtDelta: 0,
+                    trustDelta: -1
+                }
+            }
+        ]
+    }
+];
+
+const state = {
+    playerName: "",
+    group: "",
+    scenarioKey: null,
+    scenario: null,
+    currentYearIndex: 0,
+    indicators: {},
+    prevIndicators: {},
+    debt: 0,
+    baseResource: 0,
+    availableResource: 0,
+    selectedResourceKey: "conservative",
+    finished: false,
+    history: {
+        years: [],
+        social: [],
+        infra: [],
+        economy: [],
+        digital: []
+    },
+    munis: {
+        capital: 0,
+        agglom: 0,
+        mono: 0,
+        rural: 0
+    },
+    currentEvent: null,
+    charts: {
+        socialChart: null,
+        econChart: null
+    },
+    goals: [],
+    goalsInitialValues: {}
+};
+
+function deepCopy(obj) {
+    return JSON.parse(JSON.stringify(obj));
+}
+function clamp(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
+function avg(arr) {
+    if (!arr.length) return 0;
+    return arr.reduce((a,b) => a + b, 0) / arr.length;
+}
+function classifyKpi(v) {
+    if (v < 55) return "bad";
+    if (v < 70) return "warn";
+    return "good";
+}
+function formatDelta(delta) {
+    if (Math.abs(delta) < 0.1) return "0.0";
+    const sign = delta > 0 ? "+" : "";
+    return sign + delta.toFixed(1);
+}
+function getIndicatorValue(id) {
+    return state.indicators[id] ?? 0;
+}
+function setIndicatorValue(id, value) {
+    state.indicators[id] = clamp(value, 0, 120);
+}
+function indicatorDelta(id) {
+    const now = state.indicators[id] ?? 0;
+    const prev = state.prevIndicators[id] ?? now;
+    return now - prev;
+}
+function computeClusterValues() {
+    const socialIds = INDICATORS.filter(k => k.group === "social").map(k => k.id);
+    const infraIds = INDICATORS.filter(k => k.group === "infra").map(k => k.id);
+    const econIds = INDICATORS.filter(k => k.group === "economy").map(k => k.id);
+    const digitalIds = INDICATORS.filter(k => k.group === "digital").map(k => k.id);
+
+    const socialVals = socialIds.map(id => state.indicators[id] ?? 0);
+    const infraVals = infraIds.map(id => state.indicators[id] ?? 0);
+    const econVals = econIds.map(id => state.indicators[id] ?? 0);
+    const digitalVals = digitalIds.map(id => state.indicators[id] ?? 0);
+
+    return {
+        social: avg(socialVals),
+        infra: avg(infraVals),
+        economy: avg(econVals),
+        digital: avg(digitalVals)
+    };
+}
+function colorForScore(score) {
+    const v = clamp(score, 0, 100);
+    let r, g, b = 0;
+    if (v <= 50) {
+        const ratio = v / 50.0;
+        r = 255;
+        g = Math.round(255 * ratio);
+    } else {
+        const ratio = (v - 50) / 50.0;
+        r = Math.round(255 * (1 - ratio));
+        g = 255;
+    }
+    return "rgb(" + r + "," + g + ",0)";
+}
+
+const introSection = document.getElementById("introSection");
+const gameSection = document.getElementById("gameSection");
+const chartsSection = document.getElementById("chartsSection");
+const summarySection = document.getElementById("summarySection");
+
+const fioInput = document.getElementById("fioInput");
+const groupInput = document.getElementById("groupInput");
+const scenarioSelect = document.getElementById("scenarioSelect");
+const startGameBtn = document.getElementById("startGameBtn");
+
+const yearLabel = document.getElementById("yearLabel");
+const termLabel = document.getElementById("termLabel");
+const playerLabel = document.getElementById("playerLabel");
+const scenarioLabel = document.getElementById("scenarioLabel");
+const roundIndexLabel = document.getElementById("roundIndexLabel");
+const roundTotalLabel = document.getElementById("roundTotalLabel");
+
+const baseResourceStat = document.getElementById("baseResourceStat");
+const availableResourceStat = document.getElementById("availableResourceStat");
+const debtStat = document.getElementById("debtStat");
+const trustStat = document.getElementById("trustStat");
+const socialIndexStat = document.getElementById("socialIndexStat");
+const infraIndexStat = document.getElementById("infraIndexStat");
+const economyIndexStat = document.getElementById("economyIndexStat");
+const digitalIndexStat = document.getElementById("digitalIndexStat");
+
+const kpiTableBody = document.getElementById("kpiTableBody");
+const resourceOptionsContainer = document.getElementById("resourceOptionsContainer");
+const resourcePreview = document.getElementById("resourcePreview");
+const reformsContainer = document.getElementById("reformsContainer");
+const eventContainer = document.getElementById("eventContainer");
+const gameMessage = document.getElementById("gameMessage");
+
+const applyYearBtn = document.getElementById("applyYearBtn");
+const nextYearBtn = document.getElementById("nextYearBtn");
+const resetGameBtn = document.getElementById("resetGameBtn");
+
+const summaryPlayer = document.getElementById("summaryPlayer");
+const summaryScenario = document.getElementById("summaryScenario");
+const scoreKpi = document.getElementById("scoreKpi");
+const scoreFinance = document.getElementById("scoreFinance");
+const scoreTrust = document.getElementById("scoreTrust");
+const scoreTotal = document.getElementById("scoreTotal");
+
+const goalsSummary = document.getElementById("goalsSummary");
+const profileSummary = document.getElementById("profileSummary");
+
+const muniCapitalScore = document.getElementById("muniCapitalScore");
+const muniAgglomScore = document.getElementById("muniAgglomScore");
+const muniMonoScore = document.getElementById("muniMonoScore");
+const muniRuralScore = document.getElementById("muniRuralScore");
+const muniCapitalColor = document.getElementById("muniCapitalColor");
+const muniAgglomColor = document.getElementById("muniAgglomColor");
+const muniMonoColor = document.getElementById("muniMonoColor");
+const muniRuralColor = document.getElementById("muniRuralColor");
+
+const polyCapital = document.getElementById("poly_capital");
+const polyAgglom = document.getElementById("poly_agglom");
+const polyMono = document.getElementById("poly_mono");
+const polyRural = document.getElementById("poly_rural");
+
+document.addEventListener("DOMContentLoaded", () => {
+    startGameBtn.addEventListener("click", onStartGame);
+    resetGameBtn.addEventListener("click", () => {
+        if (confirm("Начать симуляцию заново?")) location.reload();
+    });
+    applyYearBtn.addEventListener("click", onApplyYear);
+    nextYearBtn.addEventListener("click", onNextYear);
+
+    buildGoalsUI();
+    buildResourceOptionsUI();
+    buildReformsUI();
+    initCharts();
+    roundTotalLabel.textContent = YEARS.length.toString();
+    resourcePreview.textContent = "-";
+});
+
+function buildGoalsUI() {
+    const container = document.getElementById("goalsContainer");
+    container.innerHTML = "";
+    INDICATORS.forEach(ind => {
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "checkbox";
+        input.dataset.indicatorId = ind.id;
+        input.addEventListener("change", onGoalChange);
+
+        const text = document.createElement("div");
+        text.textContent = ind.idx + ". " + ind.name;
+
+        label.appendChild(input);
+        label.appendChild(text);
+        container.appendChild(label);
+    });
+}
+function onGoalChange(e) {
+    const container = document.getElementById("goalsContainer");
+    const checked = container.querySelectorAll("input[type='checkbox']:checked");
+    if (checked.length > 3) {
+        e.target.checked = false;
+        alert("Можно выбрать не более трёх стратегических целей.");
+    }
+}
+
+function buildResourceOptionsUI() {
+    resourceOptionsContainer.innerHTML = "";
+    RESOURCE_OPTIONS.forEach(opt => {
+        const id = "resource_" + opt.key;
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "resourceStrategy";
+        input.value = opt.key;
+        input.id = id;
+        if (opt.key === state.selectedResourceKey) {
+            input.checked = true;
+        }
+        input.addEventListener("change", onResourceOptionChange);
+
+        const textContainer = document.createElement("div");
+        const title = document.createElement("div");
+        title.textContent = opt.label;
+        const descr = document.createElement("div");
+        descr.textContent = opt.description;
+        descr.style.fontSize = "0.78rem";
+        descr.style.color = "var(--text-muted)";
+
+        textContainer.appendChild(title);
+        textContainer.appendChild(descr);
+
+        label.appendChild(input);
+        label.appendChild(textContainer);
+
+        resourceOptionsContainer.appendChild(label);
+    });
+}
+
+function buildReformsUI() {
+    reformsContainer.innerHTML = "";
+    REFORMS.forEach(r => {
+        const card = document.createElement("div");
+        card.className = "reform-card";
+
+        const header = document.createElement("div");
+        header.className = "reform-header";
+
+        const left = document.createElement("div");
+        left.className = "reform-title";
+        left.textContent = r.name;
+
+        const right = document.createElement("div");
+        right.className = "reform-cost";
+        right.textContent = "Стоимость: " + r.cost + " усл. ед.";
+
+        header.appendChild(left);
+        header.appendChild(right);
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.id = "reform_" + r.key;
+        checkbox.dataset.reformKey = r.key;
+
+        const topRow = document.createElement("div");
+        topRow.style.display = "flex";
+        topRow.style.alignItems = "center";
+        topRow.style.gap = "0.4rem";
+        topRow.appendChild(checkbox);
+        topRow.appendChild(header);
+
+        const body = document.createElement("div");
+        body.className = "reform-body";
+        body.textContent = r.description;
+
+        const kpiList = document.createElement("div");
+        kpiList.className = "reform-kpi-list";
+        const affectedNames = r.affects
+            .map(idx => INDICATORS.find(k => k.idx === idx))
+            .filter(Boolean)
+            .map(ind => ind.idx + ". " + ind.name);
+        kpiList.textContent = "Основные показатели: " + affectedNames.join("; ");
+
+        card.appendChild(topRow);
+        card.appendChild(body);
+        card.appendChild(kpiList);
+
+        reformsContainer.appendChild(card);
+    });
+}
+
+function onStartGame() {
+    const fio = fioInput.value.trim();
+    const group = groupInput.value.trim();
+    const scenarioKey = scenarioSelect.value;
+
+    if (!fio || !group) {
+        alert("Пожалуйста, укажите ФИО и номер группы.");
+        return;
+    }
+
+    const scenario = SCENARIOS[scenarioKey];
+    if (!scenario) {
+        alert("Не выбран корректный сценарий региона.");
+        return;
+    }
+
+    const goalsContainer = document.getElementById("goalsContainer");
+    const checkedGoals = goalsContainer.querySelectorAll("input[type='checkbox']:checked");
+    if (checkedGoals.length === 0) {
+        alert("Пожалуйста, выберите хотя бы одну стратегическую цель (до трёх показателей).");
+        return;
+    }
+
+    const goals = Array.from(checkedGoals).map(cb => cb.dataset.indicatorId);
+
+    state.playerName = fio;
+    state.group = group;
+    state.scenarioKey = scenarioKey;
+    state.scenario = deepCopy(scenario);
+    state.currentYearIndex = 0;
+    state.baseResource = scenario.baseResource;
+    state.debt = scenario.baseDebt;
+    state.indicators = deepCopy(scenario.baseIndicators);
+    state.prevIndicators = deepCopy(scenario.baseIndicators);
+    state.finished = false;
+    state.history = { years: [], social: [], infra: [], economy: [], digital: [] };
+    state.munis = { capital: 0, agglom: 0, mono: 0, rural: 0 };
+    state.currentEvent = null;
+    state.goals = goals;
+    state.goalsInitialValues = {};
+    goals.forEach(id => {
+        state.goalsInitialValues[id] = scenario.baseIndicators[id] ?? 0;
+    });
+
+    playerLabel.textContent = fio + " (" + group + ")";
+    scenarioLabel.textContent = scenario.name;
+
+    introSection.classList.add("hidden");
+    gameSection.classList.remove("hidden");
+    chartsSection.classList.remove("hidden");
+    summarySection.classList.add("hidden");
+
+    initYearUI();
+}
+
+function initYearUI() {
+    const idx = state.currentYearIndex;
+    if (idx >= YEARS.length) {
+        finishGame();
+        return;
+    }
+    const year = YEARS[idx];
+
+    yearLabel.textContent = year.toString();
+    termLabel.textContent = (idx < 5) ? "первый" : "второй";
+
+    roundIndexLabel.textContent = (idx + 1).toString();
+    baseResourceStat.textContent = state.baseResource.toString();
+
+    updateAvailableResourcePreview();
+    availableResourceStat.textContent = state.availableResource.toString();
+    debtStat.textContent = state.debt.toFixed(1) + " %";
+
+    const trustValue = getIndicatorValue("ind1_trust");
+    trustStat.textContent = trustValue.toFixed(1);
+
+    renderKpiTable();
+    updateClustersAndMunis();
+
+    const resourceRadios = document.querySelectorAll('input[name="resourceStrategy"]');
+    resourceRadios.forEach(r => {
+        if (r.value === state.selectedResourceKey) r.checked = true;
+    });
+
+    REFORMS.forEach(r => {
+        const cb = document.getElementById("reform_" + r.key);
+        if (cb) cb.checked = false;
+    });
+
+    state.currentEvent = pickEventForYear(idx);
+    renderEventUI();
+
+    applyYearBtn.disabled = false;
+    nextYearBtn.disabled = true;
+    showMessage("Шаг 1: выберите ресурсную стратегию. Шаг 2: отметьте реформы в пределах ресурса. Шаг 3: выберите реакцию на событие года.", "info");
+}
+
+function renderKpiTable() {
+    kpiTableBody.innerHTML = "";
+    INDICATORS.forEach(ind => {
+        const tr = document.createElement("tr");
+
+        const tdIdx = document.createElement("td");
+        tdIdx.textContent = ind.idx.toString();
+
+        const tdName = document.createElement("td");
+        tdName.textContent = ind.name;
+        tdName.className = "kpi-name";
+
+        const tdVal = document.createElement("td");
+        const v = getIndicatorValue(ind.id);
+        tdVal.textContent = v.toFixed(1);
+        tdVal.className = "num-cell";
+
+        const cls = classifyKpi(v);
+        if (cls === "bad") tdVal.classList.add("kpi-bad");
+        if (cls === "warn") tdVal.classList.add("kpi-warn");
+        if (cls === "good") tdVal.classList.add("kpi-good");
+
+        const tdDelta = document.createElement("td");
+        const d = indicatorDelta(ind.id);
+        tdDelta.textContent = formatDelta(d);
+        tdDelta.className = "num-cell";
+        if (d > 0.1) {
+            tdDelta.classList.add("kpi-good");
+        } else if (d < -0.1) {
+            tdDelta.classList.add("kpi-bad");
+        }
+
+        tr.appendChild(tdIdx);
+        tr.appendChild(tdName);
+        tr.appendChild(tdVal);
+        tr.appendChild(tdDelta);
+
+        kpiTableBody.appendChild(tr);
+    });
+}
+
+function onResourceOptionChange(e) {
+    const key = e.target.value;
+    state.selectedResourceKey = key;
+    updateAvailableResourcePreview();
+}
+function getSelectedResourceOption() {
+    const key = state.selectedResourceKey || "conservative";
+    return RESOURCE_OPTIONS.find(o => o.key === key) || RESOURCE_OPTIONS[0];
+}
+function updateAvailableResourcePreview() {
+    const opt = getSelectedResourceOption();
+    const available = Math.max(0, state.baseResource + opt.resourceDelta);
+    state.availableResource = available;
+    resourcePreview.textContent = available.toString();
+}
+
+function pickEventForYear(yearIndex) {
+    if (Math.random() > 0.8) {
+        return null;
+    }
+    const idx = Math.floor(Math.random() * EVENTS.length);
+    return EVENTS[idx];
+}
+function renderEventUI() {
+    eventContainer.innerHTML = "";
+    if (!state.currentEvent) {
+        const title = document.createElement("div");
+        title.className = "event-title";
+        title.textContent = "В этом году крупных событий не произошло.";
+        const text = document.createElement("div");
+        text.textContent = "Вы можете сосредоточиться на реализации выбранных реформ.";
+        eventContainer.appendChild(title);
+        eventContainer.appendChild(text);
+        return;
+    }
+
+    const ev = state.currentEvent;
+    const title = document.createElement("div");
+    title.className = "event-title";
+    title.textContent = ev.title;
+
+    const descr = document.createElement("div");
+    descr.textContent = ev.description;
+
+    const optionsDiv = document.createElement("div");
+    optionsDiv.className = "event-options";
+
+    ev.options.forEach(opt => {
+        const id = "event_" + ev.key + "_" + opt.key;
+        const label = document.createElement("label");
+        const input = document.createElement("input");
+        input.type = "radio";
+        input.name = "eventOption";
+        input.value = opt.key;
+        input.id = id;
+
+        const textContainer = document.createElement("div");
+        textContainer.textContent = opt.label;
+
+        label.appendChild(input);
+        label.appendChild(textContainer);
+        optionsDiv.appendChild(label);
+    });
+
+    eventContainer.appendChild(title);
+    eventContainer.appendChild(descr);
+    eventContainer.appendChild(optionsDiv);
+}
+
+function onApplyYear() {
+    if (state.finished) return;
+
+    const opt = getSelectedResourceOption();
+    const selectedReforms = [];
+    let costSum = 0;
+
+    REFORMS.forEach(r => {
+        const checkbox = document.getElementById("reform_" + r.key);
+        if (checkbox && checkbox.checked) {
+            selectedReforms.push(r);
+            costSum += r.cost;
+        }
+    });
+
+    if (costSum === 0) {
+        showMessage("Вы не выбрали ни одной реформы. Для учебных целей выберите хотя бы одну программу.", "error");
+        return;
+    }
+
+    const available = state.availableResource;
+    if (costSum > available) {
+        showMessage("Суммарная стоимость выбранных реформ (" + costSum + " ед.) превышает доступный ресурс (" + available + " ед.). Скорректируйте выбор.", "error");
+        return;
+    }
+
+    let chosenEventOption = null;
+    if (state.currentEvent) {
+        const selected = document.querySelector('input[name="eventOption"]:checked');
+        if (!selected) {
+            showMessage("Выберите, как реагировать на событие года, или дождитесь спокойного года.", "error");
+            return;
+        }
+        const key = selected.value;
+        chosenEventOption = state.currentEvent.options.find(o => o.key === key) || null;
+    }
+
+    state.prevIndicators = deepCopy(state.indicators);
+    const newIndicators = deepCopy(state.indicators);
+
+    INDICATORS.forEach(ind => {
+        let base = newIndicators[ind.id];
+        let delta = -0.3;
+        const shock = (Math.random() - 0.5);
+        delta += shock;
+        newIndicators[ind.id] = base + delta;
+    });
+
+    selectedReforms.forEach(r => {
+        Object.entries(r.effects).forEach(([id, eff]) => {
+            const oldVal = newIndicators[id] ?? 0;
+            let factor = 1.0;
+            if (oldVal >= 80) factor = 0.5;
+            if (oldVal >= 90) factor = 0.25;
+            newIndicators[id] = oldVal + eff * factor;
+        });
+    });
+
+    Object.entries(newIndicators).forEach(([id, val]) => {
+        newIndicators[id] = clamp(val, 0, 120);
+    });
+
+    const optTrustDelta = opt.trustDelta || 0;
+    const optIncomeDelta = opt.incomeDelta || 0;
+
+    const oldTrust = newIndicators["ind1_trust"] ?? 0;
+    newIndicators["ind1_trust"] = clamp(oldTrust + optTrustDelta, 0, 120);
+
+    const oldIncome = newIndicators["ind18_income"] ?? 0;
+    newIndicators["ind18_income"] = clamp(oldIncome + optIncomeDelta, 0, 120);
+
+    if (state.currentEvent && chosenEventOption) {
+        const eff = chosenEventOption.effects || {};
+        const indEff = eff.indicators || {};
+        Object.entries(indEff).forEach(([id, delta]) => {
+            const oldVal = newIndicators[id] ?? 0;
+            newIndicators[id] = clamp(oldVal + delta, 0, 120);
+        });
+        const evTrustDelta = eff.trustDelta || 0;
+        const oldTrust2 = newIndicators["ind1_trust"] ?? 0;
+        newIndicators["ind1_trust"] = clamp(oldTrust2 + evTrustDelta, 0, 120);
+        state.debt = clamp(state.debt + (eff.debtDelta || 0), 0, 150);
+    }
+
+    state.debt = clamp(state.debt + (opt.debtDelta || 0), 0, 150);
+    state.indicators = newIndicators;
+
+    debtStat.textContent = state.debt.toFixed(1) + " %";
+    trustStat.textContent = (state.indicators["ind1_trust"] ?? 0).toFixed(1);
+
+    renderKpiTable();
+    updateClustersAndMunis();
+
+    updateClusterHistory();
+    updateCharts();
+
+    applyYearBtn.disabled = true;
+    nextYearBtn.disabled = false;
+
+    showMessage("Решения за год применены. Посмотрите, как изменились показатели, агрегированные индексы и карта муниципалитетов, затем переходите к следующему году.", "success");
+}
+
+function onNextYear() {
+    state.currentYearIndex += 1;
+    if (state.currentYearIndex >= YEARS.length) {
+        finishGame();
+    } else {
+        initYearUI();
+    }
+}
+
+function showMessage(text, type) {
+    gameMessage.textContent = text || "";
+    gameMessage.className = "messages";
+    if (type === "error") gameMessage.classList.add("message-error");
+    if (type === "success") gameMessage.classList.add("message-success");
+}
+
+function updateClustersAndMunis() {
+    const clusters = computeClusterValues();
+    socialIndexStat.textContent = clusters.social.toFixed(1);
+    infraIndexStat.textContent = clusters.infra.toFixed(1);
+    economyIndexStat.textContent = clusters.economy.toFixed(1);
+    digitalIndexStat.textContent = clusters.digital.toFixed(1);
+
+    function muniScore(weights) {
+        return (
+            (clusters.social * (weights.social || 0)) +
+            (clusters.infra * (weights.infra || 0)) +
+            (clusters.economy * (weights.economy || 0)) +
+            (clusters.digital * (weights.digital || 0))
+        );
+    }
+
+    state.munis.capital = muniScore(MUNICIPAL_ZONES.capital.weights);
+    state.munis.agglom = muniScore(MUNICIPAL_ZONES.agglom.weights);
+    state.munis.mono = muniScore(MUNICIPAL_ZONES.mono.weights);
+    state.munis.rural = muniScore(MUNICIPAL_ZONES.rural.weights);
+
+    muniCapitalScore.textContent = state.munis.capital.toFixed(1) + " (0–100)";
+    muniAgglomScore.textContent = state.munis.agglom.toFixed(1) + " (0–100)";
+    muniMonoScore.textContent = state.munis.mono.toFixed(1) + " (0–100)";
+    muniRuralScore.textContent = state.munis.rural.toFixed(1) + " (0–100)";
+
+    const colCapital = colorForScore(state.munis.capital);
+    const colAgglom = colorForScore(state.munis.agglom);
+    const colMono = colorForScore(state.munis.mono);
+    const colRural = colorForScore(state.munis.rural);
+
+    muniCapitalColor.style.backgroundColor = colCapital;
+    muniAgglomColor.style.backgroundColor = colAgglom;
+    muniMonoColor.style.backgroundColor = colMono;
+    muniRuralColor.style.backgroundColor = colRural;
+
+    polyCapital.style.fill = colCapital;
+    polyAgglom.style.fill = colAgglom;
+    polyMono.style.fill = colMono;
+    polyRural.style.fill = colRural;
+}
+
+function updateClusterHistory() {
+    const year = YEARS[state.currentYearIndex];
+    const clusters = computeClusterValues();
+    state.history.years.push(year);
+    state.history.social.push(clusters.social);
+    state.history.infra.push(clusters.infra);
+    state.history.economy.push(clusters.economy);
+    state.history.digital.push(clusters.digital);
+}
+
+function initCharts() {
+    const socialCtx = document.getElementById("socialChart").getContext("2d");
+    const econCtx = document.getElementById("econChart").getContext("2d");
+
+    state.charts.socialChart = new Chart(socialCtx, {
+        type: "line",
+        data: {
+            labels: [],
+            datasets: [
+                { label: "Социальный блок и демография", data: [], borderWidth: 2, fill: false },
+                { label: "Городская среда и инфраструктура", data: [], borderWidth: 2, borderDash: [4,4], fill: false }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 120,
+                    ticks: { stepSize: 20 }
+                }
+            },
+            plugins: {
+                legend: { position: "bottom", labels: { boxWidth: 12 } }
+            }
+        }
+    });
+
+    state.charts.econChart = new Chart(econCtx, {
+        type: "line",
+        data: {
+            labels: [],
+            datasets: [
+                { label: "Экономика и доходы", data: [], borderWidth: 2, fill: false },
+                { label: "Цифровое развитие", data: [], borderWidth: 2, borderDash: [4,4], fill: false }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            scales: {
+                y: {
+                    min: 0,
+                    max: 120,
+                    ticks: { stepSize: 20 }
+                }
+            },
+            plugins: {
+                legend: { position: "bottom", labels: { boxWidth: 12 } }
+            }
+        }
+    });
+}
+
+function updateCharts() {
+    const sc = state.charts.socialChart;
+    const ec = state.charts.econChart;
+    if (!sc || !ec) return;
+
+    const h = state.history;
+
+    sc.data.labels = h.years;
+    sc.data.datasets[0].data = h.social;
+    sc.data.datasets[1].data = h.infra;
+    sc.update();
+
+    ec.data.labels = h.years;
+    ec.data.datasets[0].data = h.economy;
+    ec.data.datasets[1].data = h.digital;
+    ec.update();
+}
+
+function finishGame() {
+    state.finished = true;
+    gameSection.classList.add("hidden");
+    summarySection.classList.remove("hidden");
+    chartsSection.classList.remove("hidden");
+
+    const scenario = state.scenario;
+    summaryPlayer.textContent = state.playerName + " (" + state.group + ")";
+    summaryScenario.textContent = scenario.name;
+
+    const allVals = INDICATORS.map(ind => state.indicators[ind.id] ?? 0);
+    let kpiScore = avg(allVals);
+    kpiScore = clamp(kpiScore, 0, 100);
+
+    let financeScore = 100;
+    if (state.debt > 20) {
+        financeScore -= (state.debt - 20) * 1.0;
+    }
+    financeScore = clamp(financeScore, 0, 100);
+
+    const trustVal = state.indicators["ind1_trust"] ?? 0;
+    const trustScoreVal = clamp(trustVal, 0, 100);
+
+    const total = Math.round(0.5 * kpiScore + 0.3 * financeScore + 0.2 * trustScoreVal);
+
+    scoreKpi.textContent = kpiScore.toFixed(1);
+    scoreFinance.textContent = financeScore.toFixed(1);
+    scoreTrust.textContent = trustScoreVal.toFixed(1);
+    scoreTotal.textContent = total.toString();
+
+    updateGoalsSummary();
+    updateProfileSummary(kpiScore, financeScore, trustScoreVal);
+}
+
+function updateGoalsSummary() {
+    const goals = state.goals || [];
+    if (!goals.length) {
+        goalsSummary.textContent = "Стратегические цели не были заданы, оценка приведена по сбалансированному набору показателей.";
+        return;
+    }
+    const names = goals.map(id => {
+        const ind = INDICATORS.find(k => k.id === id);
+        return ind ? ind.idx + ". " + ind.name : id;
+    });
+
+    const finalVals = goals.map(id => state.indicators[id] ?? 0);
+    const initVals = goals.map(id => state.goalsInitialValues[id] ?? state.scenario.baseIndicators[id] ?? 0);
+
+    const finalAvg = avg(finalVals);
+    const initAvg = avg(initVals);
+    const delta = finalAvg - initAvg;
+
+    goalsSummary.textContent =
+        "Вы выбрали следующие стратегические цели: " +
+        names.join("; ") +
+        ". Средний уровень достижения этих целей к концу симуляции составил " +
+        finalAvg.toFixed(1) +
+        " пункта при стартовом уровне " +
+        initAvg.toFixed(1) +
+        " пункта, прирост составил " +
+        formatDelta(delta) +
+        " п.п.";
+}
+
+function updateProfileSummary(kpiScore, financeScore, trustScore) {
+    const clusters = computeClusterValues();
+    let title = "";
+    let text = "";
+
+    if (kpiScore >= 75 && financeScore >= 70 && trustScore >= 70) {
+        title = "Сбалансированный системный лидер";
+        text = "Вам удалось одновременно поддерживать высокие значения большинства показателей, не допустить ухудшения финансовой устойчивости и сохранить доверие населения на приемлемом уровне. Это управленческий профиль, максимально приближенный к целям Указа.";
+    } else if (clusters.social >= clusters.economy && clusters.social >= clusters.infra && clusters.social >= clusters.digital && trustScore >= kpiScore) {
+        title = "Социально ориентированный руководитель";
+        text = "Вы делали акцент на социально-демографических показателях, человеческом капитале и поддержании доверия населения, даже при определённых финансовых ограничениях.";
+    } else if (clusters.economy >= clusters.social && clusters.economy >= clusters.infra && clusters.economy >= clusters.digital && financeScore >= trustScore) {
+        title = "Экономический технократ";
+        text = "Основной акцент управления был сделан на росте доходов, инвестиций и поддержке предпринимательства. Часть социальных или инфраструктурных показателей могла развиваться медленнее, но экономическая база региона усилилась.";
+    } else if (financeScore >= kpiScore + 10 && financeScore >= 60 && trustScore < financeScore) {
+        title = "Жёсткий бюджетный консерватор";
+        text = "Вы стремились к снижению долговой нагрузки и финансовой устойчивости любой ценой. Часть целевых показателей и доверие населения могли пострадать, но фискальная позиция региона улучшилась.";
+    } else if (clusters.digital >= clusters.social && clusters.digital >= clusters.infra && clusters.digital >= clusters.economy) {
+        title = "Цифровой реформатор";
+        text = "Вы активно использовали цифровизацию как инструмент модернизации управления и социальной сферы. Цифровая зрелость региона растёт быстрее других блоков, что может дать дополнительный эффект в перспективе.";
+    } else {
+        title = "Поиск баланса в сложных условиях";
+        text = "Управленческие решения были вынужденно компромиссными: часть показателей улучшилась, часть осталась на прежнем уровне или снизилась. Это типичная ситуация региона со смешанным набором проблем и ограниченным ресурсом реформ.";
+    }
+
+    profileSummary.innerHTML =
+        "<strong>Управленческий профиль:</strong> " + title + ". " + text;
+}
+</script>
+</body>
+</html>

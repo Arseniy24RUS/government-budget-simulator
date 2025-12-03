@@ -89,6 +89,23 @@
     .header-title {
       text-align: center;
       margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .header-title img {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+    }
+    .page-header {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 12px;
     }
 
     .year-bar {
@@ -158,6 +175,20 @@
       .layout-two-columns {
         grid-template-columns: 1fr;
       }
+    }
+
+    .player-zone {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .stats-zone {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 10px;
     }
 
     .budget-input-row {
@@ -313,6 +344,18 @@
       margin-top: 10px;
       margin-bottom: 8px;
       flex-wrap: wrap;
+    }
+
+    .next-btn {  
+      font-size: 1.05rem;
+      padding: 12px 24px;
+      background: linear-gradient(135deg, #0b63e5, #1a7bff);
+      box-shadow: 0 6px 14px rgba(26,123,255,0.3);
+    }
+
+    .next-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(26,123,255,0.35);
     }
 
     table {
@@ -471,8 +514,11 @@
 </head>
 <body>
   <div class="page">
-    <div class="header-title">
-      <h1>Симулятор деятельности губернатора субъекта РФ</h1>
+    <div class="page-header">
+      <div class="header-title">
+        <img src="logo.png" alt="Логотип симулятора" />
+        <h1>Симулятор деятельности губернатора субъекта РФ</h1>
+      </div>
     </div>
 
     <!-- Ввод ФИО, группы и сценария -->
@@ -530,107 +576,83 @@
         </p>
       </div>
 
-      <!-- Лог событий -->
-      <div id="eventLogCard" class="card">
-        <h3>Лог событий</h3>
-        <div id="eventLog" class="event-log-list"></div>
-      </div>
-
-      <!-- Группы населения -->
-      <div id="groupsCard" class="card">
-        <h3>Группы населения и общественная поддержка</h3>
-        <p style="font-size:0.8rem;color:#555;margin-bottom:8px;">
-          У каждой группы населения свой уровень удовлетворённости. Итоговый индекс «Поддержка населения»
-          рассчитывается как взвешенная сумма по всем группам и отображается в шапке.
-        </p>
-        <table>
-          <thead>
-            <tr>
-              <th>Группа</th>
-              <th>Доля</th>
-              <th>Удовл.</th>
-              <th>Индикатор</th>
-            </tr>
-          </thead>
-          <tbody id="groupsTableBody"></tbody>
-        </table>
-      </div>
-
-      <!-- Долгосрочные ситуации -->
-      <div id="situationsCard" class="card">
-        <h3>Долгосрочные ситуации</h3>
-        <div id="situationsList"></div>
-        <p style="font-size:0.8rem;color:#555;margin-top:6px;">
-          Ситуации запускаются при неблагоприятных сочетаниях показателей и ежегодно влияют на KPI,
-          пока вы не исправите исходные причины (показатели и удовлетворённость групп).
-        </p>
-      </div>
-
-      <div class="layout-two-columns">
-        <!-- Бюджет -->
-        <div class="card">
-          <h3>Бюджет и экономическая стратегия</h3>
-          <p style="font-size:0.85rem; color:#555; margin-top:0;">
-            Базовый доход региона: около 800 млрд ₽ в год. Фактический доход зависит от доходов населения,
-            налоговой нагрузки и возврата прошлых инвестиций.
-          </p>
-
-          <h4 style="margin-top:4px; margin-bottom:4px; font-size:0.9rem;">Распределение текущего бюджета по блокам (%)</h4>
-          <div id="budgetInputs"></div>
-          <div id="budgetSummary" class="budget-summary"></div>
-          <div id="budgetMoney" class="budget-summary" style="margin-top:4px; color:#444;"></div>
-
-          <div class="budget-chart">
-            <canvas id="budgetPie" height="140"></canvas>
-          </div>
-
-          <hr style="margin:10px 0; border:none; border-top:1px solid #e0e4f0;" />
-
-          <h4 style="margin:4px 0; font-size:0.9rem;">Налоговая политика</h4>
-          <label for="taxLevel" style="margin-bottom:2px;">Уровень налоговой нагрузки</label>
-          <select id="taxLevel">
-            <option value="low">Низкая — ↓ доход бюджета, ↑ уровень жизни</option>
-            <option value="medium" selected>Умеренная — баланс</option>
-            <option value="high">Высокая — ↑ доход бюджета, ↓ качество жизни</option>
-          </select>
-
-          <h4 style="margin:8px 0 4px; font-size:0.9rem;">Инвестиционный фонд</h4>
-          <label for="investmentShare" style="margin-bottom:2px;">Доля бюджета, направляемая в инвестиционный фонд, %</label>
-          <input id="investmentShare" type="number" min="0" max="30" step="1" value="10" />
-
-          <label for="investmentHorizon" style="margin-top:6px; margin-bottom:2px;">Горизонт инвестиций (лет)</label>
-          <select id="investmentHorizon">
-            <option value="2">2 года</option>
-            <option value="3" selected>3 года</option>
-            <option value="4">4 года</option>
-          </select>
-
-          <p style="font-size:0.8rem; color:#555; margin-top:4px;">
-            Чем больше доля инвестиций и срок ожидания, тем сильнее вырастет бюджет в будущем,
-            но тем меньше средств останется на текущие программы.
+      <div class="player-zone">
+        <!-- Долгосрочные ситуации -->
+        <div id="situationsCard" class="card">
+          <h3>Долгосрочные ситуации</h3>
+          <div id="situationsList"></div>
+          <p style="font-size:0.8rem;color:#555;margin-top:6px;">
+            Ситуации запускаются при неблагоприятных сочетаниях показателей и ежегодно влияют на KPI,
+            пока вы не исправите исходные причины (показатели и удовлетворённость групп).
           </p>
         </div>
 
-        <!-- Управленческие решения -->
-        <div class="card policy-panel">
-          <h3>Управленческие решения</h3>
-          <small>
-            Отметьте меры, которые вы хотите реализовывать. У каждой меры есть стоимость в млрд ₽ в год.
-            Суммарная стоимость выбранных мер в каждом блоке не должна превышать бюджет этого блока
-            (в млрд ₽), а одновременно можно реализовывать не более 12 мер.
-          </small>
-          <div id="policyContainer"></div>
-          <div class="policy-limit">
-            Выбрано мер: <span id="policyCount">0</span> / <span id="policyLimit"></span>
+        <div class="layout-two-columns">
+          <!-- Бюджет -->
+          <div class="card">
+            <h3>Бюджет и экономическая стратегия</h3>
+            <p style="font-size:0.85rem; color:#555; margin-top:0;">
+              Базовый доход региона: около 800 млрд ₽ в год. Фактический доход зависит от доходов населения,
+              налоговой нагрузки и возврата прошлых инвестиций.
+            </p>
+
+            <h4 style="margin-top:4px; margin-bottom:4px; font-size:0.9rem;">Распределение текущего бюджета по блокам (%)</h4>
+            <div id="budgetInputs"></div>
+            <div id="budgetSummary" class="budget-summary"></div>
+            <div id="budgetMoney" class="budget-summary" style="margin-top:4px; color:#444;"></div>
+
+            <div class="budget-chart">
+              <canvas id="budgetPie" height="140"></canvas>
+            </div>
+
+            <hr style="margin:10px 0; border:none; border-top:1px solid #e0e4f0;" />
+
+            <h4 style="margin:4px 0; font-size:0.9rem;">Налоговая политика</h4>
+            <label for="taxLevel" style="margin-bottom:2px;">Уровень налоговой нагрузки</label>
+            <select id="taxLevel">
+              <option value="low">Низкая — ↓ доход бюджета, ↑ уровень жизни</option>
+              <option value="medium" selected>Умеренная — баланс</option>
+              <option value="high">Высокая — ↑ доход бюджета, ↓ качество жизни</option>
+            </select>
+
+            <h4 style="margin:8px 0 4px; font-size:0.9rem;">Инвестиционный фонд</h4>
+            <label for="investmentShare" style="margin-bottom:2px;">Доля бюджета, направляемая в инвестиционный фонд, %</label>
+            <input id="investmentShare" type="number" min="0" max="30" step="1" value="10" />
+
+            <label for="investmentHorizon" style="margin-top:6px; margin-bottom:2px;">Горизонт инвестиций (лет)</label>
+            <select id="investmentHorizon">
+              <option value="2">2 года</option>
+              <option value="3" selected>3 года</option>
+              <option value="4">4 года</option>
+            </select>
+
+            <p style="font-size:0.8rem; color:#555; margin-top:4px;">
+              Чем больше доля инвестиций и срок ожидания, тем сильнее вырастет бюджет в будущем,
+              но тем меньше средств останется на текущие программы.
+            </p>
           </div>
-          <div id="activePoliciesView"></div>
+
+          <!-- Управленческие решения -->
+          <div class="card policy-panel">
+            <h3>Управленческие решения</h3>
+            <small>
+              Отметьте меры, которые вы хотите реализовывать. У каждой меры есть стоимость в млрд ₽ в год.
+              Суммарная стоимость выбранных мер в каждом блоке не должна превышать бюджет этого блока
+              (в млрд ₽), а одновременно можно реализовывать не более 12 мер.
+            </small>
+            <div id="policyContainer"></div>
+            <div class="policy-limit">
+              Выбрано мер: <span id="policyCount">0</span> / <span id="policyLimit"></span>
+            </div>
+            <div id="activePoliciesView"></div>
+          </div>
         </div>
       </div>
 
       <div class="card">
         <div class="actions-bar">
           <div>
-            <button id="nextBtn">Следующий год</button>
+            <button id="nextBtn" class="next-btn">Следующий год</button>
             <button id="resetBtn" class="secondary">Начать заново</button>
           </div>
           <div style="font-size:0.8rem; color:#555;">
@@ -638,8 +660,11 @@
             по KPI и по поддержке населения.
           </div>
         </div>
+        <p style="font-size:0.85rem; color:#444; margin:0 0 6px 0;">Сначала определите решения, затем переходите к следующему году.</p>
+      </div>
 
-        <div>
+      <div class="stats-zone">
+        <div class="card">
           <h3>Ключевые показатели эффективности</h3>
           <table>
             <thead>
@@ -668,6 +693,34 @@
           </div>
 
           <div id="evaluation" class="hidden"></div>
+        </div>
+
+        <div class="layout-two-columns">
+          <!-- Лог событий -->
+          <div id="eventLogCard" class="card">
+            <h3>Лог событий</h3>
+            <div id="eventLog" class="event-log-list"></div>
+          </div>
+
+          <!-- Группы населения -->
+          <div id="groupsCard" class="card">
+            <h3>Группы населения и общественная поддержка</h3>
+            <p style="font-size:0.8rem;color:#555;margin-bottom:8px;">
+              У каждой группы населения свой уровень удовлетворённости. Итоговый индекс «Поддержка населения»
+              рассчитывается как взвешенная сумма по всем группам и отображается в шапке.
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Группа</th>
+                  <th>Доля</th>
+                  <th>Удовл.</th>
+                  <th>Индикатор</th>
+                </tr>
+              </thead>
+              <tbody id="groupsTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

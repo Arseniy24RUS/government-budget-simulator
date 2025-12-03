@@ -514,6 +514,13 @@
       font-size: 0.8rem;
       color: #333;
     }
+
+    .signature {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #666;
+      margin: 32px 0 12px;
+    }
   </style>
 </head>
 <body>
@@ -720,12 +727,14 @@
                       <h3>Нагрузка по блокам</h3>
                       <canvas id="loadChart" height="80"></canvas>
                     </div>
-          
+
                     <div id="evaluation" class="hidden"></div>
         </div>
       </div>
     </div>
   </div>
+
+  <div class="signature">Ситковский Арсений Михайлович, 2025</div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -2107,12 +2116,24 @@
           type: 'line',
           data: {
             labels: [],
-            datasets: [{
-              label: 'Индекс эффективности',
-              data: [],
-              fill: false,
-              tension: 0.15
-            }]
+            datasets: [
+              {
+                label: 'Индекс эффективности',
+                data: [],
+                fill: false,
+                tension: 0.15,
+                borderColor: '#0b63e5',
+                backgroundColor: '#0b63e5'
+              },
+              {
+                label: 'Индекс общественной поддержки',
+                data: [],
+                fill: false,
+                tension: 0.15,
+                borderColor: '#2e7d32',
+                backgroundColor: '#2e7d32'
+              }
+            ]
           },
           options: {
             responsive: true,
@@ -2507,6 +2528,7 @@
 
       function updateSituationsActivation() {
         if (!situationsState || !situationsState.length) return;
+        if (currentYear <= startYear) return;
         situationsState.forEach(state => {
           const cfg = state.config;
           if (state.active) {
@@ -2781,7 +2803,7 @@
         }
 
         const score = computeOverallScore();
-        history.push({ year: currentYear, score });
+        history.push({ year: currentYear, score, support: publicSupportIndex });
         updateMetricsUI();
         updateChart();
       }
@@ -2790,6 +2812,7 @@
         if (!chart) return;
         chart.data.labels = history.map(h => h.year.toString());
         chart.data.datasets[0].data = history.map(h => h.score);
+        chart.data.datasets[1].data = history.map(h => h.support ?? publicSupportIndex);
         chart.update();
       }
 
@@ -2940,13 +2963,7 @@
         updateLoadChart(categoryBudgetBn, requiredBn);
         updateBudgetSummary(); // пересчитать суммы в млрд ₽ по новым параметрам
 
-        // 6. Обновление групп и ситуаций (на основе текущих показателей)
-        computeGroupSupport();
-        updateGroupSupportUI();
-        updateSituationsActivation();
-        renderSituationsList();
-
-        // 7. Обновление KPI
+        // 6. Обновление KPI
         metricsConfig.forEach(m => {
           let value = metrics[m.id];
 
@@ -2986,9 +3003,13 @@
           metrics[m.id] = round2(value);
         });
 
-        // 8. Группы и поддержка населения после изменения KPI
+        // 7. Группы и поддержка населения после изменения KPI
         computeGroupSupport();
         updateGroupSupportUI();
+
+        // 8. Активируем или завершаем долгосрочные ситуации после действий игрока
+        updateSituationsActivation();
+        renderSituationsList();
 
         // 9. Лог событий
         if (currentEvent && chosenOption) {
@@ -3007,7 +3028,7 @@
         updateTimeline();
 
         const score = computeOverallScore();
-        history.push({ year: currentYear, score });
+        history.push({ year: currentYear, score, support: publicSupportIndex });
         updateMetricsUI();
         updateChart();
 

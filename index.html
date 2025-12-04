@@ -163,8 +163,8 @@
 
     .phase-timeline {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 8px;
       margin-top: 6px;
       width: 100%;
     }
@@ -175,6 +175,7 @@
       border: 1px solid #d8dff0;
       font-size: 0.85rem;
       color: #2b3a55;
+      word-break: break-word;
     }
     .phase-segment .phase-years {
       font-size: 0.75rem;
@@ -390,6 +391,51 @@
     .next-turn-card .actions-bar {
       margin-top: 6px;
       margin-bottom: 6px;
+    }
+
+    .evaluation-card {
+      position: relative;
+      background: linear-gradient(135deg, #fff7e6 0%, #eef4ff 60%, #e5f3ff 100%);
+      border: 2px solid #ff9800;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+    .evaluation-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at 20% 20%, rgba(255, 214, 102, 0.35), transparent 35%),
+                  radial-gradient(circle at 80% 0%, rgba(11, 99, 229, 0.18), transparent 40%);
+      opacity: 0.9;
+    }
+    .evaluation-card > * {
+      position: relative;
+      z-index: 1;
+    }
+    .evaluation-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    .evaluation-emoji {
+      font-size: 1.6rem;
+    }
+    .evaluation-chip {
+      background: #0b63e5;
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 3px 10px rgba(11, 99, 229, 0.25);
+    }
+    .evaluation-subtitle {
+      font-size: 0.9rem;
+      color: #2b3a55;
+      margin-top: -2px;
     }
 
     .actions-bar #nextBtn {
@@ -624,6 +670,7 @@
 
     <!-- Основной экран игры -->
     <div id="game" class="hidden">
+      <div id="evaluation" class="card evaluation-card hidden"></div>
       <div class="card">
         <div class="year-bar">
           <span><strong>Год:</strong> <span id="yearLabel"></span></span>
@@ -636,19 +683,19 @@
         <div id="phaseTimeline" class="phase-timeline"></div>
       </div>
 
-            <div class="zone-choices">
-<!-- Блок случайного события года -->
-      <div id="eventCard" class="card">
-        <h3 class="event-title">Событие года</h3>
-        <div id="eventYearLabel" class="event-year-label"></div>
-        <div id="eventBadge" class="event-badge"></div>
-        <h4 id="eventTitle"></h4>
-        <p id="eventDescription"></p>
-        <div id="eventOptions"></div>
-        <p id="eventHint" style="font-size:0.8rem;color:#555;margin-top:6px;">
-          Выберите один из вариантов решения. Событие будет учтено при переходе к следующему году.
-        </p>
-      </div>
+      <div class="zone-choices">
+        <!-- Блок случайного события года -->
+        <div id="eventCard" class="card">
+          <h3 class="event-title">Событие года</h3>
+          <div id="eventYearLabel" class="event-year-label"></div>
+          <div id="eventBadge" class="event-badge"></div>
+          <h4 id="eventTitle"></h4>
+          <p id="eventDescription"></p>
+          <div id="eventOptions"></div>
+          <p id="eventHint" style="font-size:0.8rem;color:#555;margin-top:6px;">
+            Выберите один из вариантов решения. Событие будет учтено при переходе к следующему году.
+          </p>
+        </div>
 
       <!-- Долгосрочные ситуации -->
       <div id="situationsCard" class="card">
@@ -791,8 +838,6 @@
                       <h3>Нагрузка по блокам</h3>
                       <canvas id="loadChart" class="chart-canvas" height="80"></canvas>
                     </div>
-
-                    <div id="evaluation" class="hidden"></div>
         </div>
       </div>
       </div>
@@ -4562,14 +4607,23 @@
 
         evaluationDiv.classList.remove('hidden');
         evaluationDiv.innerHTML = `
-          <h3>Итоговое заключение</h3>
+          <div class="evaluation-header">
+            <span class="evaluation-emoji">🏁</span>
+            <div>
+              <h3 style="margin:0;">Итоговое заключение</h3>
+              <div class="evaluation-subtitle">Вы завершили симуляцию — сохраните результат</div>
+            </div>
+            <span class="evaluation-chip">Финиш: ${currentYear} г.</span>
+          </div>
           <p><strong>Студент:</strong> ${escapeHtml(student.fio)}<br/>
           <strong>Группа:</strong> ${escapeHtml(student.group)}</p>
           <p><strong>Сценарий:</strong> ${scenarios[scenarioKey].name}</p>
-          <p><strong>Год завершения:</strong> ${currentYear}</p>
-          <p><strong>Общий индекс эффективности (KPI):</strong> ${finalScore.toFixed(1)} из 100</p>
-          <p><strong>Поддержка населения:</strong> ${publicSupportIndex.toFixed(1)} из 100 (${supportText})</p>
-          <p><strong>Формальная оценка по KPI:</strong> ${grade}</p>
+          <div style="display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 4px;">
+            <span class="evaluation-chip" style="background:#ffb300;">KPI: ${finalScore.toFixed(1)} / 100</span>
+            <span class="evaluation-chip" style="background:#1b7e3c;">Поддержка: ${publicSupportIndex.toFixed(1)} / 100</span>
+            <span class="evaluation-chip">Оценка: ${grade}</span>
+          </div>
+          <p><strong>Комментарий по поддержке:</strong> ${supportText}</p>
           <p style="font-size:0.9rem;">${comboText}</p>
           <p style="font-size:0.85rem; color:#555;">
             Вы можете использовать этот скриншот как подтверждение выполнения задания.

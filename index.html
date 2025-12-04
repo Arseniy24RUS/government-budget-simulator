@@ -203,6 +203,16 @@
       margin-top: 6px;
     }
 
+    .budget-callout {
+      background: #f0f6ff;
+      border-left: 4px solid #0b63e5;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 0.9rem;
+      margin: 8px 0;
+      color: #1c2d46;
+    }
+
     .budget-chart {
       margin-top: 8px;
     }
@@ -593,15 +603,13 @@
         <!-- Бюджет -->
         <div class="card">
           <h3>Бюджет и экономическая стратегия</h3>
-          <p style="font-size:0.85rem; color:#555; margin-top:0;">
-            Базовый доход региона: около 800 млрд ₽ в год. Фактический доход зависит от доходов населения,
-            налоговой нагрузки и возврата прошлых инвестиций.
-          </p>
+          <div id="budgetMoney" class="budget-callout">
+            Общий бюджет на год: рассчитываем исходя из текущих показателей региона.
+          </div>
 
           <h4 style="margin-top:4px; margin-bottom:4px; font-size:0.9rem;">Распределение текущего бюджета по блокам (%)</h4>
           <div id="budgetInputs"></div>
           <div id="budgetSummary" class="budget-summary"></div>
-          <div id="budgetMoney" class="budget-summary" style="margin-top:4px; color:#444;"></div>
 
           <div class="budget-chart">
             <canvas id="budgetPie" height="140"></canvas>
@@ -618,8 +626,8 @@
           </select>
 
           <h4 style="margin:8px 0 4px; font-size:0.9rem;">Инвестиционный фонд</h4>
-          <label for="investmentShare" style="margin-bottom:2px;">Доля бюджета, направляемая в инвестиционный фонд, %</label>
-          <input id="investmentShare" type="number" min="0" max="30" step="1" value="10" />
+          <label for="investmentShare" style="margin-bottom:2px;">Доля бюджета, направляемая в инвестиционный фонд, % (берётся из распределения выше)</label>
+          <input id="investmentShare" type="number" min="0" max="30" step="1" value="0" />
 
           <label for="investmentHorizon" style="margin-top:6px; margin-bottom:2px;">Горизонт инвестиций (лет)</label>
           <select id="investmentHorizon">
@@ -781,6 +789,20 @@
         { id: 'infra',    name: 'Инфраструктура и среда' },
         { id: 'economy',  name: 'Экономика и цифровизация' }
       ];
+
+      const budgetCategories = [
+        ...categories,
+        { id: 'investment', name: 'Инвестиционный фонд' }
+      ];
+
+      const defaultBudgetShares = {
+        social: 20,
+        health: 20,
+        edu: 20,
+        infra: 20,
+        economy: 20,
+        investment: 0
+      };
 
       const metricsConfig = [
         { id: 'trust',       name: 'Доверие к власти',                         base: 50,  target: 70, min: 0,   max: 100, weight: 1.2 },
@@ -1833,6 +1855,310 @@
               metrics: { trust: -0.2 }
             }
           ]
+        },
+        {
+          id: 'tech_university',
+          title: 'Рост амбиций регионального университета',
+          description: 'Вуз хочет войти в топ-200 мировых рейтингов и просит поддержки.',
+          options: [
+            {
+              id: 'boost_university',
+              label: 'Выделить 2 млрд ₽ на лаборатории и кампус',
+              description: 'Ускоренное развитие, приезд учёных и студентов из других регионов.',
+              budgetDelta: -2,
+              metrics: { education: +1.6, investment: +0.5, trust: +0.4 }
+            },
+            {
+              id: 'grant_competition',
+              label: 'Запустить грантовый конкурс (0.8 млрд ₽)',
+              description: 'Точечная поддержка лучших проектов вместо тотального финансирования.',
+              budgetDelta: -0.8,
+              metrics: { education: +0.9, digital: +0.6 }
+            },
+            {
+              id: 'no_support_university',
+              label: 'Обойтись без региональных вложений',
+              description: 'Сохранить бюджет, но университет замедлит развитие.',
+              budgetDelta: 0,
+              metrics: { education: -0.4, trust: -0.2 }
+            }
+          ]
+        },
+        {
+          id: 'wildfire',
+          rare: true,
+          title: 'Лесные пожары',
+          description: 'Засушливое лето вызывает крупные возгорания в лесах региона.',
+          options: [
+            {
+              id: 'air_support',
+              label: 'Привлечь авиацию и добровольцев (2 млрд ₽)',
+              description: 'Быстрая ликвидация, минимальный ущерб экологии.',
+              budgetDelta: -2,
+              metrics: { environment: +1.5, trust: +0.8 }
+            },
+            {
+              id: 'focus_on_towns',
+              label: 'Сконцентрироваться на защите населённых пунктов (1 млрд ₽)',
+              description: 'Леса пострадают сильнее, но жители в безопасности.',
+              budgetDelta: -1,
+              metrics: { environment: -0.4, trust: +0.3 }
+            },
+            {
+              id: 'minimal_fire_action',
+              label: 'Ограничиться мониторингом',
+              description: 'Экономия средств, но риск сильного ущерба экологии.',
+              budgetDelta: 0,
+              metrics: { environment: -1.2, trust: -0.6 }
+            }
+          ]
+        },
+        {
+          id: 'cyberattack',
+          title: 'Кибератака на госуслуги региона',
+          description: 'Работа порталов госуслуг нарушена, граждане раздражены.',
+          options: [
+            {
+              id: 'emergency_it',
+              label: 'Срочно привлечь лучших специалистов (1 млрд ₽)',
+              description: 'Восстановить сервисы и усилить защиту.',
+              budgetDelta: -1,
+              metrics: { digital: +1.6, trust: +0.6 }
+            },
+            {
+              id: 'internal_team',
+              label: 'Использовать только внутренние ресурсы (0.3 млрд ₽)',
+              description: 'Дольше устранение, но дешевле.',
+              budgetDelta: -0.3,
+              metrics: { digital: +0.6, trust: -0.2 }
+            },
+            {
+              id: 'no_additional_it',
+              label: 'Переждать без доп. расходов',
+              description: 'Риск затяжных сбоев и роста недовольства.',
+              budgetDelta: 0,
+              metrics: { trust: -1.0 }
+            }
+          ]
+        },
+        {
+          id: 'data_center',
+          title: 'Строительство дата-центра крупной IT-компании',
+          description: 'Инвестор готов вложиться, но просит льгот по подключению к сетям.',
+          options: [
+            {
+              id: 'grant_discount',
+              label: 'Предоставить инфраструктурные льготы (0.5 млрд ₽)',
+              description: 'Ускорит проект и создаст рабочие места.',
+              budgetDelta: -0.5,
+              metrics: { investment: +1.4, digital: +1.2, income: +0.4 }
+            },
+            {
+              id: 'no_discount',
+              label: 'Сохранить обычные условия',
+              description: 'Инвестор оценивает предложение без преференций.',
+              budgetDelta: 0,
+              metrics: { investment: +0.3 }
+            }
+          ]
+        },
+        {
+          id: 'water_shortage',
+          title: 'Дефицит питьевой воды',
+          description: 'Засуха приводит к проблемам с водоснабжением в нескольких районах.',
+          options: [
+            {
+              id: 'new_wells',
+              label: 'Пробурить новые скважины (1.5 млрд ₽)',
+              description: 'Быстрое решение, но затраты на обслуживание.',
+              budgetDelta: -1.5,
+              metrics: { life: +0.5, environment: -0.2, trust: +0.4 }
+            },
+            {
+              id: 'pipeline_project',
+              label: 'Начать проект магистрального водовода (3 млрд ₽)',
+              description: 'Дорого, но надёжно в долгосрочной перспективе.',
+              budgetDelta: -3,
+              metrics: { life: +0.9, investment: +0.5, trust: +0.5 }
+            },
+            {
+              id: 'rationing',
+              label: 'Ввести нормирование и экономию',
+              description: 'Минимальные расходы, но рост недовольства.',
+              budgetDelta: 0,
+              metrics: { trust: -0.8, life: -0.3 }
+            }
+          ]
+        },
+        {
+          id: 'tourism_boom',
+          title: 'Вирусный ролик о регионе',
+          description: 'Популярный блогер снял ролик, и поток туристов резко вырос.',
+          options: [
+            {
+              id: 'support_infra',
+              label: 'Быстро усилить туристическую инфраструктуру (1 млрд ₽)',
+              description: 'Улучшить транспорт и сервис, чтобы закрепить успех.',
+              budgetDelta: -1,
+              metrics: { investment: +0.8, income: +0.6, environment: -0.2 }
+            },
+            {
+              id: 'promo_only',
+              label: 'Ограничиться продвижением в СМИ (0.3 млрд ₽)',
+              description: 'Сделать упор на маркетинг без крупных вложений.',
+              budgetDelta: -0.3,
+              metrics: { investment: +0.3, trust: +0.2 }
+            },
+            {
+              id: 'no_tourism_action',
+              label: 'Ничего не менять',
+              description: 'Поток может схлынуть, а жалобы на сервис вырастут.',
+              budgetDelta: 0,
+              metrics: { trust: -0.3 }
+            }
+          ]
+        },
+        {
+          id: 'energy_blackout',
+          rare: true,
+          title: 'Крупная авария в энергосистеме',
+          description: 'Несколько районов остались без электричества.',
+          options: [
+            {
+              id: 'repair_fast',
+              label: 'Экстренный ремонт (1.2 млрд ₽)',
+              description: 'Быстро восстановить сети и компенсировать бизнесу.',
+              budgetDelta: -1.2,
+              metrics: { trust: +0.7, income: +0.2 }
+            },
+            {
+              id: 'modernize_grid',
+              label: 'Параллельно начать модернизацию (2.5 млрд ₽)',
+              description: 'Снизит риски в будущем, но дороже сейчас.',
+              budgetDelta: -2.5,
+              metrics: { trust: +0.9, investment: +0.6, digital: +0.4 }
+            },
+            {
+              id: 'wait_compensation',
+              label: 'Ждать федерального финансирования',
+              description: 'Низкие затраты, но долгие жалобы.',
+              budgetDelta: 0,
+              metrics: { trust: -0.9 }
+            }
+          ]
+        },
+        {
+          id: 'governance_audit',
+          title: 'Федеральная проверка эффективности',
+          description: 'Счётная палата оценивает ваши проекты и расходы.',
+          options: [
+            {
+              id: 'prepare_full',
+              label: 'Подготовить материалы и отчётность (0.4 млрд ₽)',
+              description: 'Сокращает риск штрафов и улучшает репутацию.',
+              budgetDelta: -0.4,
+              metrics: { trust: +0.5, investment: +0.2 }
+            },
+            {
+              id: 'optimize_spending',
+              label: 'Урезать спорные проекты до приезда комиссии',
+              description: 'Экономия на будущих претензиях, но тормозит развитие.',
+              budgetDelta: 0,
+              metrics: { investment: -0.3, trust: +0.2 }
+            },
+            {
+              id: 'ignore_audit',
+              label: 'Ничего не менять',
+              description: 'Риск штрафов и публичной критики.',
+              budgetDelta: 0,
+              metrics: { trust: -0.8 }
+            }
+          ]
+        },
+        {
+          id: 'health_marathon',
+          title: 'Большой марафон здоровья',
+          description: 'Федерация предлагает провести акцию «10 000 шагов» с экспертами.',
+          options: [
+            {
+              id: 'host_marathon',
+              label: 'Организовать событие (0.6 млрд ₽)',
+              description: 'Популяризация здорового образа жизни.',
+              budgetDelta: -0.6,
+              metrics: { sport: +1.5, life: +0.2, trust: +0.3 }
+            },
+            {
+              id: 'digital_only',
+              label: 'Провести онлайн-кампанию (0.2 млрд ₽)',
+              description: 'Экономно, но меньший эффект.',
+              budgetDelta: -0.2,
+              metrics: { sport: +0.7, digital: +0.3 }
+            },
+            {
+              id: 'skip_marathon',
+              label: 'Не проводить',
+              description: 'Нет расходов и нет позитивного эффекта.',
+              budgetDelta: 0,
+              metrics: { trust: -0.2 }
+            }
+          ]
+        },
+        {
+          id: 'industrial_accident',
+          title: 'Инцидент на химическом производстве',
+          description: 'Выбросы привели к жалобам жителей и росту тревожности.',
+          options: [
+            {
+              id: 'checkups',
+              label: 'Организовать медосмотры и очистку территории (1 млрд ₽)',
+              description: 'Снимает напряжение и снижает риски.',
+              budgetDelta: -1,
+              metrics: { environment: +0.8, life: +0.3, trust: +0.5 }
+            },
+            {
+              id: 'fine_factory',
+              label: 'Штрафовать предприятие и ужесточить требования',
+              description: 'Без прямых расходов бюджета.',
+              budgetDelta: 0,
+              metrics: { environment: +0.6, investment: -0.4, trust: +0.2 }
+            },
+            {
+              id: 'downplay',
+              label: 'Свести тему к минимуму',
+              description: 'Риск протестов и репутационных потерь.',
+              budgetDelta: 0,
+              metrics: { trust: -1.0 }
+            }
+          ]
+        },
+        {
+          id: 'district_referendum',
+          rare: true,
+          title: 'Местный референдум о присоединении соседнего района',
+          description: 'Жители приграничного района хотят войти в состав вашего региона.',
+          options: [
+            {
+              id: 'support_referendum',
+              label: 'Поддержать присоединение (1 млрд ₽ на интеграцию)',
+              description: 'Расширение налоговой базы, но расходы на переходный период.',
+              budgetDelta: -1,
+              metrics: { population: +0.6, income: +0.3, trust: +0.4 }
+            },
+            {
+              id: 'neutral',
+              label: 'Сохранить нейтралитет',
+              description: 'Решение затянется, жители могут обидеться.',
+              budgetDelta: 0,
+              metrics: { trust: -0.2 }
+            },
+            {
+              id: 'oppose',
+              label: 'Выступить против',
+              description: 'Избежать расходов, но упустить рост.',
+              budgetDelta: 0,
+              metrics: { trust: -0.6, population: -0.3 }
+            }
+          ]
         }
       ];
 
@@ -1905,6 +2231,7 @@
       const taxLevelSelect       = document.getElementById('taxLevel');
       const investmentShareInput = document.getElementById('investmentShare');
       const investmentHorizonSel = document.getElementById('investmentHorizon');
+      if (investmentShareInput) investmentShareInput.readOnly = true;
 
       const policyContainer = document.getElementById('policyContainer');
       const policyCountSpan = document.getElementById('policyCount');
@@ -1953,7 +2280,7 @@
 
       function initBudgetInputs() {
         budgetInputsDiv.innerHTML = '';
-        categories.forEach(cat => {
+        budgetCategories.forEach(cat => {
           const row = document.createElement('div');
           row.className = 'budget-input-row';
 
@@ -1966,7 +2293,7 @@
           input.min = '0';
           input.max = '100';
           input.step = '1';
-          input.value = '20';
+          input.value = (defaultBudgetShares[cat.id] ?? 0).toString();
           input.dataset.categoryId = cat.id;
           input.addEventListener('input', updateBudgetSummary);
 
@@ -1983,24 +2310,41 @@
       }
 
       function updateBudgetSummary() {
-        const inputs = budgetInputsDiv.querySelectorAll('input[type="number"]');
-        let total = 0;
         const values = [];
-        inputs.forEach(inp => {
-          const v = parseFloat(inp.value.replace(',', '.')) || 0;
+        let total = 0;
+        let investmentShare = 0;
+        budgetCategories.forEach(cat => {
+          const inp = budgetInputsDiv.querySelector('input[data-category-id="' + cat.id + '"]');
+          const v = parseFloat(inp?.value.replace(',', '.') || '0') || 0;
           total += v;
           values.push(v);
+          if (cat.id === 'investment') investmentShare = v;
 
-          const row = inp.parentElement;
-          const amountSpan = row.querySelector('.budget-amount');
-          if (amountSpan) {
-            const share = v / 100;
-            const amount = share * lastSpendable;
-            amountSpan.textContent = '≈ ' + (isFinite(amount) ? amount.toFixed(1) : '0.0') + ' млрд ₽';
+          if (inp) {
+            const row = inp.parentElement;
+            const amountSpan = row.querySelector('.budget-amount');
+            if (amountSpan) {
+              const share = v / 100;
+              const amount = share * lastRevenue;
+              amountSpan.textContent = '≈ ' + (isFinite(amount) ? amount.toFixed(1) : '0.0') + ' млрд ₽';
+            }
           }
         });
+        investmentShareInput.value = investmentShare.toFixed(0);
         budgetSummaryDiv.textContent = 'Итого по блокам: ' + total.toFixed(0) + '% (должно быть 100%)';
         updateBudgetPieChart(values);
+      }
+
+      function collectBudgetPercents() {
+        const budgetsPercent = {};
+        let total = 0;
+        budgetCategories.forEach(cat => {
+          const inp = budgetInputsDiv.querySelector('input[data-category-id="' + cat.id + '"]');
+          const v = parseFloat(inp?.value.replace(',', '.') || '0') || 0;
+          budgetsPercent[cat.id] = v;
+          total += v;
+        });
+        return { budgetsPercent, total };
       }
 
       function splitPolicyEffects(p) {
@@ -2206,9 +2550,9 @@
         budgetPieChart = new Chart(ctx, {
           type: 'pie',
           data: {
-            labels: categories.map(c => c.name),
+            labels: budgetCategories.map(c => c.name),
             datasets: [{
-              data: categories.map(() => 20)
+              data: budgetCategories.map(c => defaultBudgetShares[c.id] ?? 0)
             }]
           },
           options: {
@@ -2564,8 +2908,9 @@
         const maturedReturn = peekMaturedReturn(investmentQueue);
         let revenueBeforeInvest = base * taxFactor + maturedReturn;
 
-        let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
-        investShare = clamp(investShare, 0, 30);
+        const { budgetsPercent } = collectBudgetPercents();
+        let investShare = parseFloat(budgetsPercent.investment) || 0;
+        investShare = clamp(investShare, 0, 60);
         investmentShareInput.value = investShare.toFixed(0);
 
         let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
@@ -2970,7 +3315,7 @@
         lastInvested = 0;
         lastMatured = 0;
         taxLevelSelect.value = 'medium';
-        investmentShareInput.value = 10;
+        investmentShareInput.value = (defaultBudgetShares.investment ?? 0);
         investmentHorizonSel.value = 3;
 
         initMetrics();
@@ -3043,14 +3388,7 @@
         if (currentYear > endYear) return;
 
         // 1. Распределение по блокам
-        const inputs = budgetInputsDiv.querySelectorAll('input[type="number"]');
-        const budgetsPercent = {};
-        let total = 0;
-        inputs.forEach(inp => {
-          const v = parseFloat(inp.value.replace(',', '.')) || 0;
-          budgetsPercent[inp.dataset.categoryId] = v;
-          total += v;
-        });
+        const { budgetsPercent, total } = collectBudgetPercents();
         if (Math.round(total) !== 100) {
           alert('Сумма бюджета по блокам должна быть равна 100%. Сейчас: ' + total.toFixed(1) + '%.');
           return;
@@ -3099,9 +3437,8 @@
         let revenueBeforeInvest = base * taxFactor + maturedReturn;
 
         // Новые инвестиции
-        let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
-        investShare = clamp(investShare, 0, 30);
-        investmentShareInput.value = investShare.toFixed(0);
+        let investShare = clamp(parseFloat(budgetsPercent.investment) || 0, 0, 60);
+        investmentShareInput.value = (budgetsPercent.investment ?? 0).toFixed(0);
 
         let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
         horizonYears = clamp(horizonYears, 2, 5);
@@ -3132,7 +3469,7 @@
         categories.forEach(cat => {
           const share = (budgetsPercent[cat.id] || 0) / 100.0;
           shares[cat.id] = share;
-          categoryBudgetBn[cat.id] = spendableBudget * share;
+          categoryBudgetBn[cat.id] = revenueBeforeInvest * share;
         });
 
         // 4. Проверка стоимости выбранных мер

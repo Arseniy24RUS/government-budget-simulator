@@ -538,7 +538,7 @@
       <p style="font-size:0.9rem; margin-bottom:16px;">
         Введите свои данные и нажмите «Начать симуляцию». Сценарий региона будет выбран
         случайным образом.
-        Цель — за 20 лет максимально приблизить ключевые показатели субъекта
+        Цель — за срок до 2030 года максимально приблизить ключевые показатели субъекта
         к целям, соблюдая бюджетные ограничения, налоговую политику и инвестиции,
         а также поддерживая высокую общественную поддержку.
       </p>
@@ -593,11 +593,15 @@
         <!-- Бюджет -->
         <div class="card">
           <h3>Бюджет и экономическая стратегия</h3>
-          <div id="budgetMoney" class="budget-summary" style="margin:2px 0 8px; color:#333;"></div>
+          <p style="font-size:0.85rem; color:#555; margin-top:0;">
+            Базовый доход региона: около 800 млрд ₽ в год. Фактический доход зависит от доходов населения,
+            налоговой нагрузки и возврата прошлых инвестиций.
+          </p>
 
           <h4 style="margin-top:4px; margin-bottom:4px; font-size:0.9rem;">Распределение текущего бюджета по блокам (%)</h4>
           <div id="budgetInputs"></div>
           <div id="budgetSummary" class="budget-summary"></div>
+          <div id="budgetMoney" class="budget-summary" style="margin-top:4px; color:#444;"></div>
 
           <div class="budget-chart">
             <canvas id="budgetPie" height="140"></canvas>
@@ -775,11 +779,8 @@
         { id: 'health',   name: 'Здравоохранение' },
         { id: 'edu',      name: 'Образование и культура' },
         { id: 'infra',    name: 'Инфраструктура и среда' },
-        { id: 'economy',  name: 'Экономика и цифровизация' },
-        { id: 'invest',   name: 'Инвестиции и фонд будущего' }
+        { id: 'economy',  name: 'Экономика и цифровизация' }
       ];
-
-      const baselineCategoryShare = 1 / categories.length;
 
       const metricsConfig = [
         { id: 'trust',       name: 'Доверие к власти',                         base: 50,  target: 70, min: 0,   max: 100, weight: 1.2 },
@@ -1121,18 +1122,18 @@
       policies.forEach(p => { policiesMap[p.id] = p; });
 
       const budgetInfluence = {
-        trust:      { social: +0.05, health: +0.02, edu: +0.02, infra: +0.01, economy: +0.01, invest: +0.01 },
+        trust:      { social: +0.05, health: +0.02, edu: +0.02, infra: +0.01, economy: +0.01 },
         population: { social: +0.04, health: +0.03, infra: +0.02 },
         tfr:        { social: +0.04, health: +0.01, edu: +0.01 },
         life:       { health: +0.05, infra: +0.02 },
         poverty:    { social: -0.06, economy: -0.03 },
         sport:      { health: +0.04, infra: +0.02 },
         education:  { edu: +0.05 },
-        income:     { economy: +0.06, infra: +0.02, invest: +0.03 },
-        investment: { economy: +0.06, infra: +0.02, invest: +0.08 },
-        sme_income: { economy: +0.05, edu: +0.02, invest: +0.02 },
-        environment:{ infra: +0.05, economy: -0.02, invest: -0.01 },
-        digital:    { economy: +0.05, edu: +0.02, invest: +0.02 }
+        income:     { economy: +0.06, infra: +0.02 },
+        investment: { economy: +0.06, infra: +0.02 },
+        sme_income: { economy: +0.05, edu: +0.02 },
+        environment:{ infra: +0.05, economy: -0.02 },
+        digital:    { economy: +0.05, edu: +0.02 }
       };
 
       // Долгосрочные ситуации
@@ -1832,87 +1833,6 @@
               metrics: { trust: -0.2 }
             }
           ]
-        },
-        {
-          id: 'heatwave_power',
-          title: 'Жара и перегрузка энергосистемы',
-          description: 'Аномальная жара увеличила потребление электроэнергии и нагрузку на сети.',
-          options: [
-            { id: 'cooling_centers', label: 'Открыть пункты охлаждения (1 млрд ₽)', description: 'Кондиционирование соцобъектов, помощь пожилым.', budgetDelta: -1, metrics: { life: +0.4, trust: +0.5 } },
-            { id: 'grid_upgrade', label: 'Срочно усилить сети (3 млрд ₽)', description: 'Резервные источники и ремонт.', budgetDelta: -3, metrics: { life: +0.6, trust: +0.3, environment: -0.3 } },
-            { id: 'do_nothing_heat', label: 'Ограничиться предупреждениями', description: 'Сэкономить бюджет, риск перебоев остаётся.', budgetDelta: 0, metrics: { life: -0.4, trust: -0.6 } }
-          ]
-        },
-        {
-          id: 'federal_transfer',
-          title: 'Федеральный трансферт',
-          description: 'Регион получает дополнительный трансферт на сбалансированность бюджета.',
-          autoEffect: { budgetDelta: +2, metrics: { trust: +0.3 }, label: 'Средства зачислены автоматически' }
-        },
-        {
-          id: 'currency_shock',
-          rare: true,
-          title: 'Волатильность валютного рынка',
-          description: 'Резкое ослабление рубля снижает покупательную способность населения.',
-          autoEffect: { budgetDelta: -1.5, metrics: { income: -0.6, trust: -0.5 }, label: 'Фискальные резервы сокращены' }
-        },
-        {
-          id: 'airport_expansion',
-          title: 'Расширение аэропорта',
-          description: 'Инвесторы предлагают расширить аэропорт и открыть новые направления.',
-          options: [
-            { id: 'cofinance_airport', label: 'Соинвестировать 2 млрд ₽', description: 'Регион вкладывает в взлётную полосу и терминал.', budgetDelta: -2, metrics: { investment: +1.2, income: +0.6, trust: +0.3 } },
-            { id: 'fast_track', label: 'Только ускорить согласования', description: 'Без бюджета, но поддержать администрированием.', budgetDelta: 0, metrics: { investment: +0.6 } },
-            { id: 'decline_airport', label: 'Отложить проект', description: 'Сохранить средства, рискуя потерять перевозчиков.', budgetDelta: 0, metrics: { investment: -0.6, trust: -0.3 } }
-          ]
-        },
-        {
-          id: 'teacher_strike',
-          title: 'Предупреждение о забастовке учителей',
-          description: 'Педагоги требуют повышения зарплат и обновления школ.',
-          options: [
-            { id: 'raise_salaries', label: 'Повысить оклады (2 млрд ₽)', description: 'Удержать кадры и снизить напряжение.', budgetDelta: -2, metrics: { education: +0.8, trust: +0.7 } },
-            { id: 'partial_raise', label: 'Поэтапное повышение (1 млрд ₽)', description: 'Компромиссный вариант.', budgetDelta: -1, metrics: { education: +0.5, trust: +0.3 } },
-            { id: 'no_raise', label: 'Оставить без изменений', description: 'Экономия бюджета, но риск протестов.', budgetDelta: 0, metrics: { education: -0.4, trust: -0.8 } }
-          ]
-        },
-        {
-          id: 'heritage_restore',
-          title: 'Обрушение исторического здания',
-          description: 'Часть старого квартала пострадала, жители требуют реставрации.',
-          options: [
-            { id: 'full_restore', label: 'Полная реставрация (1.2 млрд ₽)', description: 'Сохранить наследие и туристический поток.', budgetDelta: -1.2, metrics: { trust: +0.6, environment: +0.4, income: +0.2 } },
-            { id: 'façade_only', label: 'Восстановить фасады (0.6 млрд ₽)', description: 'Сдержанный вариант.', budgetDelta: -0.6, metrics: { trust: +0.3, environment: +0.2 } },
-            { id: 'demolish', label: 'Снести и построить новое', description: 'Дешевле, но вызовет споры.', budgetDelta: 0, metrics: { trust: -0.5, investment: +0.2 } }
-          ]
-        },
-        {
-          id: 'space_test',
-          title: 'Тестовый запуск ракеты на местном полигоне',
-          description: 'Госкорпорация просит содействия в подготовке полигона.',
-          options: [
-            { id: 'support_launch', label: 'Выделить 0.8 млрд ₽ на инфраструктуру', description: 'Репутационный эффект и новые заказы.', budgetDelta: -0.8, metrics: { investment: +0.8, digital: +0.4, trust: +0.3 } },
-            { id: 'logistics_only', label: 'Помочь логистикой без бюджета', description: 'Минимальные усилия.', budgetDelta: 0, metrics: { investment: +0.3 } },
-            { id: 'refuse_launch', label: 'Отказать', description: 'Избежать рисков, но упустить внимание центра.', budgetDelta: 0, metrics: { investment: -0.4, trust: -0.2 } }
-          ]
-        },
-        {
-          id: 'audit_findings',
-          title: 'Результаты федерального аудита',
-          description: 'Проверка выявила нарушения в региональных закупках.',
-          autoEffect: { budgetDelta: -0.5, metrics: { trust: -1.0, investment: -0.4 }, label: 'Штрафы и репутационные потери учтены автоматически' }
-        },
-        {
-          id: 'rail_hub',
-          title: 'Создание железнодорожного логистического хаба',
-          description: 'РЖД предлагает сделать регион узловой точкой для грузов.',
-          options: [
-            { id: 'cofinance_rail', label: 'Соинвестировать 1.5 млрд ₽', description: 'Развитие логистики и рабочих мест.', budgetDelta: -1.5, metrics: { income: +0.6, investment: +1.0, trust: +0.2 } },
-            { id: 'land_support', label: 'Предоставить землю и льготы', description: 'Без прямых трат, но с налоговыми послаблениями.', budgetDelta: 0, metrics: { investment: +0.7, income: +0.2, poverty: -0.1 } },
-            { id: 'decline_rail', label: 'Отказаться', description: 'Сэкономить силы администрации.', budgetDelta: 0, metrics: { investment: -0.5 } }
-          ]
-        }
-
         }
       ];
 
@@ -1985,8 +1905,6 @@
       const taxLevelSelect       = document.getElementById('taxLevel');
       const investmentShareInput = document.getElementById('investmentShare');
       const investmentHorizonSel = document.getElementById('investmentHorizon');
-      investmentShareInput.disabled = true;
-      investmentShareInput.title = 'Доля инвестиций задаётся в распределении бюджета (строка «Инвестиции и фонд будущего»).';
 
       const policyContainer = document.getElementById('policyContainer');
       const policyCountSpan = document.getElementById('policyCount');
@@ -2048,8 +1966,7 @@
           input.min = '0';
           input.max = '100';
           input.step = '1';
-          const defaultValue = cat.id === 'invest' ? 0 : Math.round(100 / (categories.length - 1));
-          input.value = defaultValue.toString();
+          input.value = '20';
           input.dataset.categoryId = cat.id;
           input.addEventListener('input', updateBudgetSummary);
 
@@ -2065,26 +1982,12 @@
         updateBudgetSummary();
       }
 
-      function readBudgetPercents() {
-        const map = {};
-        const inputs = budgetInputsDiv.querySelectorAll('input[type="number"]');
-        inputs.forEach(inp => {
-          const v = parseFloat(inp.value.replace(',', '.')) || 0;
-          map[inp.dataset.categoryId] = v;
-        });
-        return map;
-      }
-
       function updateBudgetSummary() {
-        const budgetsPercent = readBudgetPercents();
         const inputs = budgetInputsDiv.querySelectorAll('input[type="number"]');
         let total = 0;
         const values = [];
-        const investShare = budgetsPercent['invest'] || 0;
-        const operationalTotal = Math.max(0.0001, 100 - investShare);
-
         inputs.forEach(inp => {
-          const v = budgetsPercent[inp.dataset.categoryId] || 0;
+          const v = parseFloat(inp.value.replace(',', '.')) || 0;
           total += v;
           values.push(v);
 
@@ -2092,17 +1995,10 @@
           const amountSpan = row.querySelector('.budget-amount');
           if (amountSpan) {
             const share = v / 100;
-            let amount = 0;
-            if (inp.dataset.categoryId === 'invest') {
-              amount = (lastRevenue || 0) * share;
-            } else {
-              const normalizedShare = operationalTotal > 0 ? v / operationalTotal : 0;
-              amount = (lastSpendable || 0) * normalizedShare;
-            }
+            const amount = share * lastSpendable;
             amountSpan.textContent = '≈ ' + (isFinite(amount) ? amount.toFixed(1) : '0.0') + ' млрд ₽';
           }
         });
-        investmentShareInput.value = (investShare || 0).toFixed(0);
         budgetSummaryDiv.textContent = 'Итого по блокам: ' + total.toFixed(0) + '% (должно быть 100%)';
         updateBudgetPieChart(values);
       }
@@ -2661,7 +2557,6 @@
       }
 
       function computeBudgetSnapshot() {
-        const budgetsPercent = readBudgetPercents();
         const incomeIndex = metrics.income;
         const base = budgetBase * (incomeIndex / 100.0);
         const taxLevel = taxLevelSelect.value;
@@ -2669,7 +2564,9 @@
         const maturedReturn = peekMaturedReturn(investmentQueue);
         let revenueBeforeInvest = base * taxFactor + maturedReturn;
 
-        let investShare = clamp(budgetsPercent['invest'] || 0, 0, 60);
+        let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
+        investShare = clamp(investShare, 0, 30);
+        investmentShareInput.value = investShare.toFixed(0);
 
         let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
         horizonYears = clamp(horizonYears, 2, 5);
@@ -2846,10 +2743,6 @@
         });
       }
 
-      function isAutoEvent(ev) {
-        return !ev.options || ev.options.length === 0;
-      }
-
       function generateNewEvent() {
         if (!eventCardDiv) return;
         if (currentYear > endYear) {
@@ -2899,15 +2792,6 @@
         eventDescriptionEl.textContent = currentEvent.description;
         eventOptionsDiv.innerHTML = '';
 
-        if (isAutoEvent(currentEvent)) {
-          const hint = document.createElement('div');
-          hint.style.fontSize = '0.85rem';
-          hint.style.color = '#555';
-          hint.textContent = 'Решение не требуется: последствия применятся автоматически.';
-          eventOptionsDiv.appendChild(hint);
-          currentEventChoiceId = '__auto__';
-        }
-
         if (eventBadgeEl) {
           if (currentEvent.rare) {
             eventBadgeEl.innerHTML = '<span class="event-badge-rare">Редкое событие</span>';
@@ -2918,7 +2802,7 @@
           }
         }
 
-        (currentEvent.options || []).forEach(opt => {
+        currentEvent.options.forEach(opt => {
           const wrap = document.createElement('div');
           wrap.className = 'event-option';
           const label = document.createElement('label');
@@ -2926,10 +2810,6 @@
           radio.type = 'radio';
           radio.name = 'eventOption';
           radio.value = opt.id;
-          if (currentEvent.options.length === 1) {
-            radio.checked = true;
-            currentEventChoiceId = opt.id;
-          }
           label.appendChild(radio);
           const strong = document.createElement('strong');
           strong.textContent = ' ' + opt.label;
@@ -3177,7 +3057,7 @@
         }
 
         // Проверка выбора события
-        if (currentEvent && !isAutoEvent(currentEvent) && !currentEventChoiceId) {
+        if (currentEvent && !currentEventChoiceId) {
           alert('Сначала выберите вариант решения по событию года.');
           return;
         }
@@ -3185,25 +3065,12 @@
         let eventMetrics = {};
         let eventBudgetDelta = 0;
         let chosenOption = null;
-        let eventLabel = null;
-        if (currentEvent) {
-          if (isAutoEvent(currentEvent)) {
-            const auto = currentEvent.autoEffect || currentEvent.effect || {};
-            eventMetrics = auto.metrics || {};
-            if (typeof auto.budgetDelta === 'number') {
-              eventBudgetDelta = auto.budgetDelta;
-            } else if (typeof currentEvent.budgetDelta === 'number') {
-              eventBudgetDelta = currentEvent.budgetDelta;
-            }
-            eventLabel = auto.label || 'Автоматическое событие';
-          } else if (currentEventChoiceId) {
-            chosenOption = currentEvent.options.find(o => o.id === currentEventChoiceId);
-            if (chosenOption) {
-              eventMetrics = chosenOption.metrics || {};
-              if (typeof chosenOption.budgetDelta === 'number') {
-                eventBudgetDelta = chosenOption.budgetDelta;
-              }
-              eventLabel = chosenOption.label;
+        if (currentEvent && currentEventChoiceId) {
+          chosenOption = currentEvent.options.find(o => o.id === currentEventChoiceId);
+          if (chosenOption) {
+            eventMetrics = chosenOption.metrics || {};
+            if (typeof chosenOption.budgetDelta === 'number') {
+              eventBudgetDelta = chosenOption.budgetDelta;
             }
           }
         }
@@ -3232,15 +3099,13 @@
         let revenueBeforeInvest = base * taxFactor + maturedReturn;
 
         // Новые инвестиции
-        const budgetsPercent = readBudgetPercents();
-        let investShare = clamp(budgetsPercent['invest'] || 0, 0, 60);
+        let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
+        investShare = clamp(investShare, 0, 30);
         investmentShareInput.value = investShare.toFixed(0);
 
         let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
         horizonYears = clamp(horizonYears, 2, 5);
         investmentHorizonSel.value = horizonYears.toString();
-
-        const operationalTotal = Math.max(0.0001, 100 - investShare);
 
         let investmentAmount = revenueBeforeInvest * (investShare / 100.0);
 
@@ -3265,15 +3130,9 @@
         const shares = {};
         const categoryBudgetBn = {};
         categories.forEach(cat => {
-          const pct = budgetsPercent[cat.id] || 0;
-          if (cat.id === 'invest') {
-            shares[cat.id] = investShare / 100;
-            categoryBudgetBn[cat.id] = investmentAmount;
-          } else {
-            const normalized = operationalTotal > 0 ? pct / operationalTotal : 0;
-            shares[cat.id] = spendableBudget > 0 ? normalized * (spendableBudget / revenueBeforeInvest) : 0;
-            categoryBudgetBn[cat.id] = spendableBudget * normalized;
-          }
+          const share = (budgetsPercent[cat.id] || 0) / 100.0;
+          shares[cat.id] = share;
+          categoryBudgetBn[cat.id] = spendableBudget * share;
         });
 
         // 4. Проверка стоимости выбранных мер
@@ -3345,7 +3204,7 @@
 
           const bInf = budgetInfluence[m.id] || {};
           for (const [catId, coeff] of Object.entries(bInf)) {
-            const diff = shares[catId] - baselineCategoryShare;
+            const diff = shares[catId] - 0.2;
             delta += coeff * diff * 30;
           }
 
@@ -3385,11 +3244,11 @@
         renderSituationsList();
 
         // 9. Лог событий
-        if (currentEvent && (chosenOption || eventLabel)) {
+        if (currentEvent && chosenOption) {
           eventLog.push({
             year: currentYear,
             title: currentEvent.title,
-            optionLabel: eventLabel || (chosenOption ? chosenOption.label : ''),
+            optionLabel: chosenOption.label,
             rare: !!currentEvent.rare
           });
           renderEventLog();

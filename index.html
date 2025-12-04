@@ -626,7 +626,10 @@
             <option value="2">2 года</option>
             <option value="3" selected>3 года</option>
             <option value="4">4 года</option>
+            <option value="5">5 лет</option>
           </select>
+
+          <div id="investmentForecast" class="budget-summary" style="margin-top:6px; color:#333;"></div>
 
           <p style="font-size:0.8rem; color:#555; margin-top:4px;">
             Чем больше доля инвестиций и срок ожидания, тем сильнее вырастет бюджет в будущем,
@@ -658,10 +661,7 @@
                     <button id="nextBtn">Следующий год</button>
                     <button id="resetBtn" class="secondary">Начать заново</button>
                   </div>
-                  <div style="font-size:0.8rem; color:#555;">
-                    Симуляция идёт с 2025 по 2030 год. В конце вы получите интегральную оценку:
-                    по KPI и по поддержке населения.
-                  </div>
+                    <div style="font-size:0.8rem; color:#555;" id="yearsHint"></div>
                 </div>
       </div>
 
@@ -750,12 +750,13 @@
       </table>
     </div>
 
-    <div class="signature">Ситковский Арсений Михайлович, 2025</div>
+    <div class="signature" id="signature"></div>
 
     <script>
     document.addEventListener('DOMContentLoaded', () => {
-      const startYear = 2025;
-      const endYear   = 2030;
+      const nowYear = new Date().getFullYear();
+      const startYear = nowYear;
+      const endYear   = startYear + 20;
       const maxPolicies = 12;
 
       const firebaseConfig = {
@@ -1847,7 +1848,10 @@
       let budgetPieChart = null;
       let loadChart = null;
 
-      let budgetBase = 800;   // базовый доход региона, млрд ₽
+      const DRIFT_COEFF = 0.006;
+      const DELTA_DAMPING = 0.55;
+
+      let budgetBase = 620;   // базовый доход региона, млрд ₽ (умеренный дефицит)
       let investmentQueue = []; // массив {amount, yearsLeft, multiplier}
       let lastRevenue = budgetBase;
       let lastSpendable = budgetBase;
@@ -1879,6 +1883,8 @@
       const scenarioLabel= document.getElementById('scenarioLabel');
       const scoreLabel   = document.getElementById('scoreLabel');
       const supportLabel = document.getElementById('supportLabel');
+      const signatureEl  = document.getElementById('signature');
+      const yearsHint    = document.getElementById('yearsHint');
 
       const yearTimelineDiv = document.getElementById('yearTimeline');
 
@@ -1894,6 +1900,7 @@
       const budgetInputsDiv = document.getElementById('budgetInputs');
       const budgetSummaryDiv= document.getElementById('budgetSummary');
       const budgetMoneyDiv  = document.getElementById('budgetMoney');
+      const investmentForecastDiv = document.getElementById('investmentForecast');
 
       const taxLevelSelect       = document.getElementById('taxLevel');
       const investmentShareInput = document.getElementById('investmentShare');
@@ -1917,6 +1924,13 @@
       const resetBtn  = document.getElementById('resetBtn');
 
       policyLimitSpan.textContent = maxPolicies.toString();
+      if (signatureEl) {
+        signatureEl.textContent = 'Ситковский Арсений Михайлович, ' + startYear;
+      }
+      if (yearsHint) {
+        yearsHint.textContent = 'Симуляция идёт с ' + startYear + ' по ' + endYear +
+          ' год (20 лет). В конце вы получите интегральную оценку по KPI и поддержке населения.';
+      }
 
       // ----- Инициализация -----
 
@@ -2499,12 +2513,97 @@
         scoreLabel.textContent = score.toFixed(1);
       }
 
-      function updateBudgetMoneyUI(revenue, invested, spendable, matured) {
+      function updateBudgetMoneyUI({ revenue, invested, spendable, matured, expectedReturn, horizon }) {
         budgetMoneyDiv.textContent =
-          'Доход бюджета в этом году: ' + revenue.toFixed(0) + ' млрд ₽ ' +
+          'Общий бюджет на год: ' + revenue.toFixed(0) + ' млрд ₽ ' +
           (matured > 0 ? '(в т.ч. возврат инвестиций: ' + matured.toFixed(0) + ' млрд ₽); ' : '; ') +
           'направлено в инвестиционный фонд: ' + invested.toFixed(0) + ' млрд ₽; ' +
-          'доступно на текущие программы и события: ' + spendable.toFixed(0) + ' млрд ₽.';
+          'доступно на текущие программы и события: ' + spendable.toFixed(0) + ' млрд ₽; ' +
+          'ожидаемая выплата по новым вложениям через ' + horizon + ' лет: ' + expectedReturn.toFixed(0) + ' млрд ₽.';
+      }
+
+      function updateInvestmentForecast(snapshot) {
+        if (!investmentForecastDiv) return;
+        investmentForecastDiv.textContent =
+          'Текущая доля инвестиций: ' + (snapshot.investShare || 0).toFixed(0) +
+          '%, объём фонда: ' + snapshot.investmentAmount.toFixed(0) + ' млрд ₽; ' +
+          'прогнозируемый возврат через ' + snapshot.horizonYears + ' лет: ' +
+          snapshot.expectedReturn.toFixed(0) + ' млрд ₽.';
+      }
+
+      function getTaxFactor(level) {
+        if (level === 'low') return 0.88;
+        if (level === 'high') return 1.12;
+        return 1.0;
+      }
+
+      function getTaxMetricDelta(level) {
+        if (level === 'low') return { trust: +0.4, income: +0.45, poverty: -0.25 };
+        if (level === 'high') return { trust: -0.55, income: -0.6, poverty: +0.35 };
+        return {};
+      }
+
+      function getInvestmentMultiplier(horizonYears) {
+        const clamped = clamp(horizonYears, 1, 5);
+        return 1 + 0.18 * clamped;
+      }
+
+      function peekMaturedReturn(queue) {
+        let matured = 0;
+        queue.forEach(inv => {
+          if (inv.yearsLeft <= 1) matured += inv.amount * inv.multiplier;
+        });
+        return matured;
+      }
+
+      function computeBudgetSnapshot() {
+        const incomeIndex = metrics.income;
+        const base = budgetBase * (incomeIndex / 100.0);
+        const taxLevel = taxLevelSelect.value;
+        const taxFactor = getTaxFactor(taxLevel);
+        const maturedReturn = peekMaturedReturn(investmentQueue);
+        let revenueBeforeInvest = base * taxFactor + maturedReturn;
+
+        let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
+        investShare = clamp(investShare, 0, 30);
+        investmentShareInput.value = investShare.toFixed(0);
+
+        let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
+        horizonYears = clamp(horizonYears, 2, 5);
+        investmentHorizonSel.value = horizonYears.toString();
+
+        const investmentAmount = revenueBeforeInvest * (investShare / 100.0);
+        const spendableBudget = Math.max(0, revenueBeforeInvest - investmentAmount);
+        const expectedReturn = investmentAmount * getInvestmentMultiplier(horizonYears);
+
+        return {
+          revenueBeforeInvest,
+          investmentAmount,
+          spendableBudget,
+          maturedReturn,
+          horizonYears,
+          expectedReturn,
+          investShare,
+          taxDelta: getTaxMetricDelta(taxLevel),
+          taxFactor
+        };
+      }
+
+      function refreshBudgetPreview() {
+        if (!metrics || Object.keys(metrics).length === 0) return;
+        const snapshot = computeBudgetSnapshot();
+        lastRevenue = snapshot.revenueBeforeInvest;
+        lastSpendable = snapshot.spendableBudget;
+        updateBudgetSummary();
+        updateBudgetMoneyUI({
+          revenue: snapshot.revenueBeforeInvest,
+          invested: snapshot.investmentAmount,
+          spendable: snapshot.spendableBudget,
+          matured: snapshot.maturedReturn,
+          expectedReturn: snapshot.expectedReturn,
+          horizon: snapshot.horizonYears
+        });
+        updateInvestmentForecast(snapshot);
       }
 
       function updateActivePoliciesView() {
@@ -2865,7 +2964,7 @@
         currentYear = startYear;
 
         investmentQueue = [];
-        budgetBase = 800;
+        budgetBase = 620;
         lastRevenue = budgetBase;
         lastSpendable = budgetBase;
         lastInvested = 0;
@@ -2873,7 +2972,6 @@
         taxLevelSelect.value = 'medium';
         investmentShareInput.value = 10;
         investmentHorizonSel.value = 3;
-        budgetMoneyDiv.textContent = 'После первого хода появится информация о доходах бюджета (млрд ₽).';
 
         initMetrics();
         initBudgetInputs();
@@ -2910,6 +3008,22 @@
         } else {
           updateTimeline();
         }
+
+        const preview = computeBudgetSnapshot();
+        lastRevenue = preview.revenueBeforeInvest;
+        lastSpendable = preview.spendableBudget;
+        lastInvested = preview.investmentAmount;
+        lastMatured = preview.maturedReturn;
+        updateBudgetSummary();
+        updateBudgetMoneyUI({
+          revenue: preview.revenueBeforeInvest,
+          invested: preview.investmentAmount,
+          spendable: preview.spendableBudget,
+          matured: preview.maturedReturn,
+          expectedReturn: preview.expectedReturn,
+          horizon: preview.horizonYears
+        });
+        updateInvestmentForecast(preview);
 
         const score = computeOverallScore();
         history.push({ year: currentYear, score, support: publicSupportIndex });
@@ -2965,20 +3079,9 @@
         const incomeIndex = metrics.income;
         let base = budgetBase * (incomeIndex / 100.0);
 
-        let taxDelta = {};
-        let taxFactor = 1.0;
         const taxLevel = taxLevelSelect.value;
-        if (taxLevel === 'low') {
-          taxFactor = 0.9;
-          taxDelta.trust = +0.4;
-          taxDelta.income = +0.5;
-          taxDelta.poverty = -0.3;
-        } else if (taxLevel === 'high') {
-          taxFactor = 1.1;
-          taxDelta.trust = -0.4;
-          taxDelta.income = -0.5;
-          taxDelta.poverty = +0.3;
-        }
+        const taxDelta = getTaxMetricDelta(taxLevel);
+        const taxFactor = getTaxFactor(taxLevel);
 
         // Очередь инвестиций
         let maturedReturn = 0;
@@ -2997,11 +3100,13 @@
 
         // Новые инвестиции
         let investShare = parseFloat(investmentShareInput.value.replace(',', '.')) || 0;
-        if (investShare < 0) investShare = 0;
-        if (investShare > 30) investShare = 30;
+        investShare = clamp(investShare, 0, 30);
         investmentShareInput.value = investShare.toFixed(0);
 
-        const horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
+        let horizonYears = parseInt(investmentHorizonSel.value, 10) || 3;
+        horizonYears = clamp(horizonYears, 2, 5);
+        investmentHorizonSel.value = horizonYears.toString();
+
         let investmentAmount = revenueBeforeInvest * (investShare / 100.0);
 
         let spendableBudget = revenueBeforeInvest - investmentAmount;
@@ -3010,8 +3115,10 @@
           return;
         }
 
+        let expectedReturn = investmentAmount * getInvestmentMultiplier(horizonYears);
+
         if (investmentAmount > 1) {
-          const multiplier = 1 + 0.18 * horizonYears;
+          const multiplier = getInvestmentMultiplier(horizonYears);
           investmentQueue.push({
             amount: investmentAmount,
             yearsLeft: horizonYears,
@@ -3067,7 +3174,23 @@
         lastSpendable = spendableBudget;
         lastInvested = investmentAmount;
         lastMatured = maturedReturn;
-        updateBudgetMoneyUI(lastRevenue, lastInvested, lastSpendable, lastMatured);
+        updateBudgetMoneyUI({
+          revenue: lastRevenue,
+          invested: lastInvested,
+          spendable: lastSpendable,
+          matured: lastMatured,
+          expectedReturn,
+          horizon: horizonYears
+        });
+        updateInvestmentForecast({
+          investShare,
+          investmentAmount,
+          horizonYears,
+          expectedReturn,
+          revenueBeforeInvest,
+          spendableBudget,
+          maturedReturn
+        });
 
         updateLoadChart(categoryBudgetBn, requiredBn);
         updateBudgetSummary(); // пересчитать суммы в млрд ₽ по новым параметрам
@@ -3076,13 +3199,13 @@
         metricsConfig.forEach(m => {
           let value = metrics[m.id];
 
-          const drift = (m.target - value) * 0.01;
+          const drift = (m.target - value) * DRIFT_COEFF;
           let delta = drift;
 
           const bInf = budgetInfluence[m.id] || {};
           for (const [catId, coeff] of Object.entries(bInf)) {
             const diff = shares[catId] - 0.2;
-            delta += coeff * diff * 50;
+            delta += coeff * diff * 30;
           }
 
           selectedPolicies.forEach(pid => {
@@ -3107,7 +3230,7 @@
           // эффекты активных ситуаций
           delta = applySituationEffectsToDelta(m.id, delta);
 
-          value += delta;
+          value += delta * DELTA_DAMPING;
           value = clamp(value, m.min, m.max);
           metrics[m.id] = round2(value);
         });
@@ -3245,6 +3368,9 @@
           }
         });
       }
+      investmentShareInput.addEventListener('input', refreshBudgetPreview);
+      investmentHorizonSel.addEventListener('change', refreshBudgetPreview);
+      taxLevelSelect.addEventListener('change', refreshBudgetPreview);
       startBtn.addEventListener('click', startGame);
       nextBtn.addEventListener('click', processYear);
       resetBtn.addEventListener('click', resetGame);

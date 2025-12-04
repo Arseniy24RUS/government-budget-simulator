@@ -459,16 +459,19 @@
 
     .chart-wrapper {
       margin-top: 16px;
+      position: relative;
     }
     .chart-canvas {
       width: 100% !important;
       display: block;
-      min-height: 200px;
+      height: clamp(220px, 40vw, 360px) !important;
+      max-height: 360px;
+      min-height: 0;
     }
 
     @media (max-width: 768px) {
       .chart-wrapper {
-        min-height: 260px;
+        min-height: 0;
       }
       .chart-wrapper .chart-canvas {
         height: 240px !important;
@@ -485,11 +488,6 @@
       margin-top: 16px;
       font-size: 0.9rem;
     }
-
-    .chart-wrapper {
-      margin-top: 16px;
-    }
-
     .legend {
       font-size: 0.8rem;
       color: #555;

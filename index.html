@@ -981,7 +981,80 @@
         tax_reform:           '💰',
         it_industry:          '🖥️',
         tourism_clusters:     '🗺️',
-        startups:             '🚀'
+        startups:             '🚀',
+
+        // Вторая пятилетка
+        social_contracts:              '🤲',
+        rural_family_program:          '🌾',
+        youth_rent_housing:            '🏘️',
+        childcare_centers:             '🧸',
+        disabled_support_program:      '♿',
+        telemedicine_network:          '📡',
+        primary_care_upgrade:          '🩺',
+        mental_health_support:         '🧠',
+        rural_medicine_mobile:         '🚑',
+        vocational_education_modernization: '🛠️',
+        culture_houses_modernization:  '🎭',
+        lifelong_learning_program:     '📖',
+        school_digitalization:         '💾',
+        regional_roads:                '🛣️',
+        waste_management_reform:       '🗑️',
+        small_towns_public_spaces:     '🏞️',
+        utilities_modernization:       '🔧',
+        industrial_parks:              '🏭',
+        agro_export_support:           '🚜',
+        creative_industries_support:   '🎨',
+        export_sme_support:            '📦',
+        gov_services_digitalization:   '🖥️',
+
+        // Третья пятилетка
+        family_capital_plus_3:         '👪',
+        active_aging_program:          '🧓',
+        integrated_social_centers:     '🏢',
+        urban_renovation_housing:      '🏠',
+        social_entrepreneurship_support:'🤲',
+        oncology_cardiology_centers:   '❤️‍🩹',
+        mass_preventive_screenings:    '🔍',
+        healthy_lifestyle_infrastructure:'🏃',
+        medical_staff_motivation:      '🧑‍⚕️',
+        research_universities_support: '🧪',
+        talented_children_centers:     '🧒',
+        regional_media_and_identity:   '📻',
+        cultural_heritage_preservation:'🏛️',
+        urban_public_transport:        '🚋',
+        smart_city_technologies:       '🛰️',
+        rural_gasification:            '🔥',
+        energy_efficiency_program:     '♻️',
+        green_public_spaces:           '🌿',
+        innovation_grants_program:     '💡',
+        tourism_development_strategy:  '🧳',
+        import_substitution_industry:  '🏭',
+        ppp_infrastructure_program:    '🤝',
+        regional_brand_promotion:      '🎯',
+
+        // Четвёртая пятилетка
+        demographic_strategy_2050:     '🧭',
+        universal_family_services:     '🤱',
+        social_rental_housing:         '🏘️',
+        long_term_care_system:         '🛌',
+        managed_migration_policy:      '✈️',
+        personalized_prevention:       '🧬',
+        hightech_medical_cluster:      '🧑‍🔬',
+        rural_healthcare_upgrade:      '🚑',
+        public_health_campaign:        '📢',
+        teacher_professional_growth:   '🧑‍🏫',
+        digital_education_content:     '🖱️',
+        adult_reskilling_centers:      '🔄',
+        cultural_network_small_territories:'🏡',
+        climate_adaptation_program:    '🌧️',
+        smart_energy_grid:             '⚡',
+        integrated_transport_hubs:     '🚉',
+        water_air_cleaning:            '💧',
+        green_economy_transition:      '🌱',
+        tax_system_simplification:     '📑',
+        ai_for_state_and_business:     '🤖',
+        export_logistics_corridors:    '🚢',
+        financial_inclusion_program:   '💳'
       };
       const categoryIcons = {
         social:  '❤️',
@@ -4429,6 +4502,7 @@
         history.push({ year: currentYear, score, support: publicSupportIndex });
         updateMetricsUI();
         updateChart();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         clearSelectedPolicies();
 
         if (currentYear > endYear) {

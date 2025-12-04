@@ -419,6 +419,39 @@
     .metric-progress-inner.medium { background: #ff9800; }
     .metric-progress-inner.bad { background: #e53935; }
 
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrapper table {
+      min-width: 640px;
+    }
+
+    .chart-wrapper {
+      margin-top: 16px;
+    }
+    .chart-canvas {
+      width: 100% !important;
+      display: block;
+      min-height: 200px;
+    }
+
+    @media (max-width: 768px) {
+      .chart-wrapper {
+        min-height: 260px;
+      }
+      .chart-wrapper .chart-canvas {
+        height: 240px !important;
+      }
+      .budget-chart canvas {
+        min-height: 220px !important;
+      }
+      .table-wrapper table {
+        min-width: 520px;
+      }
+    }
+
     #evaluation {
       margin-top: 16px;
       font-size: 0.9rem;
@@ -612,7 +645,7 @@
           <div id="budgetSummary" class="budget-summary"></div>
 
           <div class="budget-chart">
-            <canvas id="budgetPie" height="140"></canvas>
+            <canvas id="budgetPie" class="chart-canvas" height="140"></canvas>
           </div>
 
           <hr style="margin:10px 0; border:none; border-top:1px solid #e0e4f0;" />
@@ -703,30 +736,32 @@
               <div class="card stats-card">
           <div>
                     <h3>Ключевые показатели эффективности</h3>
-                    <table>
-                      <thead>
-                        <tr>
-                          <th>Показатель</th>
-                          <th>Текущее</th>
-                          <th>Цель</th>
-                          <th>Прогресс</th>
-                          <th>Влияющие меры</th>
-                        </tr>
-                      </thead>
-                      <tbody id="metricsTableBody"></tbody>
-                    </table>
+                    <div class="table-wrapper">
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Показатель</th>
+                            <th>Текущее</th>
+                            <th>Цель</th>
+                            <th>Прогресс</th>
+                            <th>Влияющие меры</th>
+                          </tr>
+                        </thead>
+                        <tbody id="metricsTableBody"></tbody>
+                      </table>
+                    </div>
                     <div class="legend">
                       Зелёный — показатель близок к цели (&gt; 80%), оранжевый — средний прогресс (50–80%),
                       красный — значительное отставание (&lt; 50%).
                     </div>
           
                     <div class="chart-wrapper">
-                      <canvas id="scoreChart" height="80"></canvas>
+                      <canvas id="scoreChart" class="chart-canvas" height="80"></canvas>
                     </div>
           
                     <div class="chart-wrapper">
                       <h3>Нагрузка по блокам</h3>
-                      <canvas id="loadChart" height="80"></canvas>
+                      <canvas id="loadChart" class="chart-canvas" height="80"></canvas>
                     </div>
 
                     <div id="evaluation" class="hidden"></div>
@@ -741,21 +776,23 @@
         Здесь отображаются результаты игроков: затраченное время, KPI, поддержка населения,
         итоговая оценка и выбранный сценарием случайно регион.
       </p>
-      <table>
-        <thead>
-          <tr>
-            <th>Игрок</th>
-            <th>Группа</th>
-            <th>Сценарий</th>
-            <th>KPI</th>
-            <th>Поддержка</th>
-            <th>Оценка</th>
-            <th>Время, с</th>
-            <th>Финиш</th>
-          </tr>
-        </thead>
-        <tbody id="leaderboardBody"></tbody>
-      </table>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Игрок</th>
+              <th>Группа</th>
+              <th>Сценарий</th>
+              <th>KPI</th>
+              <th>Поддержка</th>
+              <th>Оценка</th>
+              <th>Время, с</th>
+              <th>Финиш</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
     </div>
 
     <div class="signature" id="signature"></div>
@@ -2534,6 +2571,7 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
               y: {
                 min: 0,
@@ -2557,6 +2595,7 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
               legend: {
                 position: 'bottom'
@@ -2592,6 +2631,7 @@
           },
           options: {
             responsive: true,
+            maintainAspectRatio: false,
             scales: {
               x: { stacked: false },
               y: {
@@ -2974,6 +3014,17 @@
         });
       }
 
+      function clearSelectedPolicies() {
+        selectedPolicies = new Set();
+        policyCountSpan.textContent = '0';
+        if (policyContainer) {
+          policyContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+            cb.checked = false;
+          });
+        }
+        updateActivePoliciesView();
+      }
+
       // ----- Ситуации -----
       function initSituationsState() {
         situationsState = situationsConfig.map(cfg => ({
@@ -3321,6 +3372,7 @@
         initMetrics();
         initBudgetInputs();
         createPolicyPanel();
+        clearSelectedPolicies();
         buildMetricsTable();
         initChartsIfNeeded();
         history = [];
@@ -3342,6 +3394,7 @@
         gameDiv.classList.remove('hidden');
         evaluationDiv.classList.add('hidden');
         evaluationDiv.innerHTML = '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         studentLabel.textContent = fio + ' (группа ' + group + ')';
         scenarioLabel.textContent = scenarios[scenarioKey].name;
@@ -3600,6 +3653,7 @@
         history.push({ year: currentYear, score, support: publicSupportIndex });
         updateMetricsUI();
         updateChart();
+        clearSelectedPolicies();
 
         if (currentYear > endYear) {
           endGame();

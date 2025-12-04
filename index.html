@@ -161,6 +161,35 @@
       border-color: #c0c4d6;
     }
 
+    .phase-timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 6px;
+      width: 100%;
+    }
+    .phase-segment {
+      border-radius: 8px;
+      padding: 6px 10px;
+      background: #eef2fb;
+      border: 1px solid #d8dff0;
+      font-size: 0.85rem;
+      color: #2b3a55;
+    }
+    .phase-segment .phase-years {
+      font-size: 0.75rem;
+      color: #55627d;
+    }
+    .phase-segment.active {
+      background: #0b63e5;
+      color: #fff;
+      border-color: #0b63e5;
+      box-shadow: 0 3px 10px rgba(11, 99, 229, 0.25);
+    }
+    .phase-segment.active .phase-years {
+      color: #d7e6ff;
+    }
+
     .layout-two-columns {
       display: grid;
       grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
@@ -606,6 +635,7 @@
           <span class="pill"><strong>Поддержка населения:</strong> <span id="supportLabel"></span></span>
         </div>
         <div id="yearTimeline" class="year-timeline"></div>
+        <div id="phaseTimeline" class="phase-timeline"></div>
       </div>
 
             <div class="zone-choices">
@@ -855,6 +885,7 @@
         { id: 'environment', name: 'Качество окружающей среды',               base: 55,  target: 80, min: 30, max: 100, weight: 0.9 },
         { id: 'digital',     name: 'Цифровая зрелость госуправления',         base: 40,  target: 70, min: 20, max: 100, weight: 1.0 }
       ];
+      const metricsConfigBase = metricsConfig.map(m => ({ ...m }));
 
       // Группы населения
       const groupsConfig = [
@@ -967,7 +998,7 @@
       }
 
       // Политики: cost — млрд ₽ / год
-      const policies = [
+      const policiesPhase1 = [
         // Социальная политика
         {
           id: 'children_benefits',
@@ -1177,8 +1208,651 @@
         }
       ];
 
-      const policiesMap = {};
-      policies.forEach(p => { policiesMap[p.id] = p; });
+      const policiesPhase2 = [
+        // Социальная политика (второй пакет мер)
+        {
+          id: 'social_contracts',
+          category: 'social',
+          name: 'Программа социальных контрактов',
+          cost: 30,
+          description: 'Адресные соглашения с малоимущими семьями и одинокими гражданами при условии трудоустройства, переподготовки и самозанятости.',
+          effects:     { poverty: -0.5, trust: +0.6, income: +0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'rural_family_program',
+          category: 'social',
+          name: 'Поддержка семей на селе',
+          cost: 25,
+          description: 'Жилищные сертификаты, инфраструктурные меры и соцподдержка для сельских семей с детьми.',
+          effects:     { tfr: +0.04, population: +0.3, poverty: -0.2, environment: +0.2 },
+          sideEffects: { income: -0.2 }
+        },
+        {
+          id: 'youth_rent_housing',
+          category: 'social',
+          name: 'Доступный арендный фонд для молодёжи',
+          cost: 35,
+          description: 'Создание фонда социального найма и субсидирование аренды жилья для молодых специалистов и выпускников вузов.',
+          effects:     { population: +0.4, poverty: -0.2, trust: +0.4 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'childcare_centers',
+          category: 'social',
+          name: 'Расширение сети яслей и детских садов',
+          cost: 40,
+          description: 'Строительство и модернизация дошкольных учреждений, сокращение очередей для детей до трёх лет.',
+          effects:     { tfr: +0.05, income: +0.2, trust: +0.3 },
+          sideEffects: { environment: -0.2 }
+        },
+        {
+          id: 'disabled_support_program',
+          category: 'social',
+          name: 'Поддержка людей с инвалидностью',
+          cost: 20,
+          description: 'Развитие инклюзивной инфраструктуры, адресные выплаты и социальное сопровождение людей с инвалидностью.',
+          effects:     { life: +0.3, trust: +0.5, poverty: -0.3 },
+          sideEffects: { investment: -0.1 }
+        },
+
+        // Здравоохранение (второй пакет мер)
+        {
+          id: 'telemedicine_network',
+          category: 'health',
+          name: 'Развитие телемедицины',
+          cost: 20,
+          description: 'Подключение районных больниц и ФАПов к телемедицинским сервисам, дистанционные консультации специалистов.',
+          effects:     { life: +0.5, digital: +1.0, trust: +0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'primary_care_upgrade',
+          category: 'health',
+          name: 'Укрепление первичного звена здравоохранения',
+          cost: 35,
+          description: 'Капремонт поликлиник, докомплектование врачами общей практики и медсёстрами.',
+          effects:     { life: +0.7, poverty: -0.2, trust: +0.3 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'mental_health_support',
+          category: 'health',
+          name: 'Программа психического здоровья',
+          cost: 15,
+          description: 'Развитие служб психологической помощи, профилактика зависимости и выгорания.',
+          effects:     { life: +0.3, trust: +0.5, sport: +0.5 },
+          sideEffects: {}
+        },
+        {
+          id: 'rural_medicine_mobile',
+          category: 'health',
+          name: 'Мобильные медицинские бригады',
+          cost: 25,
+          description: 'Передвижные ФАПы и выездные бригады для труднодоступных сельских и северных территорий.',
+          effects:     { life: +0.5, population: +0.2, trust: +0.4 },
+          sideEffects: { investment: -0.2 }
+        },
+
+        // Образование и культура (второй пакет мер)
+        {
+          id: 'vocational_education_modernization',
+          category: 'edu',
+          name: 'Модернизация среднего профобразования',
+          cost: 30,
+          description: 'Обновление колледжей и техникумов, дуальное обучение с участием работодателей.',
+          effects:     { education: +1.8, sme_income: +0.8, income: +0.4 },
+          sideEffects: {}
+        },
+        {
+          id: 'culture_houses_modernization',
+          category: 'edu',
+          name: 'Реновация домов культуры',
+          cost: 20,
+          description: 'Ремонт сельских и городских ДК, создание современных культурных пространств.',
+          effects:     { education: +0.8, trust: +0.6, environment: +0.3 },
+          sideEffects: {}
+        },
+        {
+          id: 'lifelong_learning_program',
+          category: 'edu',
+          name: 'Программа непрерывного образования',
+          cost: 25,
+          description: 'Курсы повышения квалификации и переобучения взрослого населения, цифровые платформы обучения.',
+          effects:     { education: +1.2, income: +0.6, sme_income: +0.5 },
+          sideEffects: {}
+        },
+        {
+          id: 'school_digitalization',
+          category: 'edu',
+          name: 'Цифровая школа',
+          cost: 25,
+          description: 'Оснащение школ цифровыми лабораториями, электронными журналами и онлайн-курсами.',
+          effects:     { education: +1.5, digital: +1.2, sme_income: +0.5 },
+          sideEffects: {}
+        },
+
+        // Инфраструктура и среда (второй пакет мер)
+        {
+          id: 'regional_roads',
+          category: 'infra',
+          name: 'Развитие региональных и местных дорог',
+          cost: 40,
+          description: 'Строительство и капитальный ремонт автодорог, повышение доступности малых городов и сёл.',
+          effects:     { income: +0.7, trust: +0.4 },
+          sideEffects: { environment: -0.5 }
+        },
+        {
+          id: 'waste_management_reform',
+          category: 'infra',
+          name: 'Реформа обращения с отходами',
+          cost: 25,
+          description: 'Создание современных полигонов, сортировочных станций и систем раздельного сбора мусора.',
+          effects:     { environment: +1.3, life: +0.3, trust: +0.4, investment: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'small_towns_public_spaces',
+          category: 'infra',
+          name: 'Благоустройство малых городов',
+          cost: 30,
+          description: 'Создание общественных пространств, набережных и парков в малых городах и моногородах.',
+          effects:     { environment: +1.0, sport: +0.7, trust: +0.5, population: +0.3 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'utilities_modernization',
+          category: 'infra',
+          name: 'Модернизация коммунальной инфраструктуры',
+          cost: 35,
+          description: 'Обновление сетей водоснабжения, теплоснабжения и канализации, снижение аварийности.',
+          effects:     { life: +0.5, environment: +0.8, investment: +0.6 },
+          sideEffects: { poverty: +0.2 }
+        },
+
+        // Экономика и цифровизация (второй пакет мер)
+        {
+          id: 'industrial_parks',
+          category: 'economy',
+          name: 'Индустриальные парки и кластеры',
+          cost: 35,
+          description: 'Создание площадок с готовой инфраструктурой для промышленных инвесторов и МСП.',
+          effects:     { investment: +1.6, income: +1.0, sme_income: +0.7 },
+          sideEffects: { environment: -0.5 }
+        },
+        {
+          id: 'agro_export_support',
+          category: 'economy',
+          name: 'Поддержка аграрного экспорта',
+          cost: 25,
+          description: 'Субсидии, логистика и продвижение региональной сельхозпродукции на внешние рынки.',
+          effects:     { income: +0.7, investment: +0.4, poverty: -0.2, population: +0.2 },
+          sideEffects: { environment: -0.3 }
+        },
+        {
+          id: 'creative_industries_support',
+          category: 'economy',
+          name: 'Развитие креативных индустрий',
+          cost: 20,
+          description: 'Поддержка IT-сектора, дизайна, медиапроектов и культурных стартапов.',
+          effects:     { income: +0.5, sme_income: +0.8, digital: +0.8, trust: +0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'export_sme_support',
+          category: 'economy',
+          name: 'Поддержка экспорта МСП',
+          cost: 25,
+          description: 'Центры поддержки экспорта, консультации, участие МСП в международных выставках.',
+          effects:     { sme_income: +1.2, income: +0.9, investment: +0.5 },
+          sideEffects: {}
+        },
+        {
+          id: 'gov_services_digitalization',
+          category: 'economy',
+          name: 'Цифровизация госуслуг и управления',
+          cost: 20,
+          description: 'Развитие порталов госуслуг, электронного документооборота и управленческой аналитики.',
+          effects:     { digital: +2.0, trust: +0.7, income: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        }
+      ];
+
+      const policiesPhase3 = [
+        // Социальная политика (третья пятилетка)
+        {
+          id: 'family_capital_plus_3',
+          category: 'social',
+          name: 'Семейный капитал «Третий ребёнок и жильё»',
+          cost: 35,
+          description: 'Расширение программы семейного капитала для рождения третьего и последующих детей с приоритетом на улучшение жилищных условий.',
+          effects:     { tfr: +0.06, poverty: -0.3, population: +0.4, trust: +0.3 },
+          sideEffects: { investment: -0.3 }
+        },
+        {
+          id: 'active_aging_program',
+          category: 'social',
+          name: 'Активное долголетие',
+          cost: 20,
+          description: 'Центры активного долголетия, занятость и волонтёрство для граждан старшего возраста, профилактика одиночества.',
+          effects:     { life: +0.5, trust: +0.5, poverty: -0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'integrated_social_centers',
+          category: 'social',
+          name: 'Единые центры социальных услуг',
+          cost: 25,
+          description: 'Создание многофункциональных центров социальной поддержки по принципу «одного окна».',
+          effects:     { poverty: -0.4, trust: +0.6, digital: +0.7 },
+          sideEffects: { investment: -0.1 }
+        },
+        {
+          id: 'urban_renovation_housing',
+          category: 'social',
+          name: 'Реновация ветхого жилья',
+          cost: 40,
+          description: 'Переселение граждан из аварийного и ветхого жилья в современные кварталы с благоустроенной средой.',
+          effects:     { life: +0.5, environment: +0.7, trust: +0.5, population: +0.3 },
+          sideEffects: { investment: -0.4 }
+        },
+        {
+          id: 'social_entrepreneurship_support',
+          category: 'social',
+          name: 'Поддержка социального предпринимательства',
+          cost: 20,
+          description: 'Гранты и льготы для проектов, решающих социальные проблемы (уход, инклюзия, реабилитация).',
+          effects:     { poverty: -0.3, sme_income: +0.8, trust: +0.3 },
+          sideEffects: {}
+        },
+
+        // Здравоохранение (третья пятилетка)
+        {
+          id: 'oncology_cardiology_centers',
+          category: 'health',
+          name: 'Центры онкологии и кардиологии',
+          cost: 40,
+          description: 'Создание высокотехнологичных центров диагностики и лечения сердечно-сосудистых и онкологических заболеваний.',
+          effects:     { life: +0.9, trust: +0.5, investment: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'mass_preventive_screenings',
+          category: 'health',
+          name: 'Массовая диспансеризация и скрининг',
+          cost: 25,
+          description: 'Регулярные профилактические осмотры, раннее выявление хронических заболеваний и факторов риска.',
+          effects:     { life: +0.7, sport: +0.5, trust: +0.3 },
+          sideEffects: {}
+        },
+        {
+          id: 'healthy_lifestyle_infrastructure',
+          category: 'health',
+          name: 'Инфраструктура здорового образа жизни',
+          cost: 30,
+          description: 'Строительство и модернизация спортивных площадок, беговых и велодорожек, бесплатные секции.',
+          effects:     { life: +0.5, sport: +1.2, environment: +0.3 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'medical_staff_motivation',
+          category: 'health',
+          name: 'Мотивация медицинских кадров',
+          cost: 30,
+          description: 'Надбавки, служебное жильё и карьерные треки для врачей и медсестёр, особенно в дефицитных территориях.',
+          effects:     { life: +0.6, trust: +0.6, income: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        },
+
+        // Образование и культура (третья пятилетка)
+        {
+          id: 'research_universities_support',
+          category: 'edu',
+          name: 'Поддержка исследовательских университетов',
+          cost: 30,
+          description: 'Развитие университетских научных центров, привлечение учёных и студентов к исследованиям.',
+          effects:     { education: +1.8, income: +0.5, investment: +0.4 },
+          sideEffects: {}
+        },
+        {
+          id: 'talented_children_centers',
+          category: 'edu',
+          name: 'Центры работы с одарёнными детьми',
+          cost: 20,
+          description: 'Региональные школы и лагеря для одарённых детей, олимпиадное движение и проектное обучение.',
+          effects:     { education: +1.5, trust: +0.3, population: +0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'regional_media_and_identity',
+          category: 'edu',
+          name: 'Поддержка региональных медиа и идентичности',
+          cost: 15,
+          description: 'Поддержка общественных и культурных медиа-проектов, продвижение региональной идентичности и истории.',
+          effects:     { trust: +0.6, education: +0.6, environment: +0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'cultural_heritage_preservation',
+          category: 'edu',
+          name: 'Сохранение культурного наследия',
+          cost: 25,
+          description: 'Реставрация объектов наследия, музеи, исторические маршруты, вовлечение местных сообществ.',
+          effects:     { environment: +0.8, trust: +0.5, tourism: +0.0 },
+          sideEffects: {}
+        },
+
+        // Инфраструктура и среда (третья пятилетка)
+        {
+          id: 'urban_public_transport',
+          category: 'infra',
+          name: 'Развитие общественного транспорта',
+          cost: 35,
+          description: 'Обновление парка общественного транспорта, выделенные полосы, интегрированные маршруты.',
+          effects:     { environment: +0.7, income: +0.4, sport: +0.3, trust: +0.4 },
+          sideEffects: { investment: -0.3 }
+        },
+        {
+          id: 'smart_city_technologies',
+          category: 'infra',
+          name: 'Технологии «умный город»',
+          cost: 25,
+          description: 'Умное освещение, датчики, цифровой мониторинг коммунальной инфраструктуры и трафика.',
+          effects:     { digital: +1.6, environment: +0.5, trust: +0.4, investment: +0.4 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'rural_gasification',
+          category: 'infra',
+          name: 'Газификация сельских территорий',
+          cost: 30,
+          description: 'Подвод газа к сельским населённым пунктам, замена печного отопления и угля.',
+          effects:     { life: +0.5, environment: +0.6, population: +0.3 },
+          sideEffects: { investment: -0.3 }
+        },
+        {
+          id: 'energy_efficiency_program',
+          category: 'infra',
+          name: 'Энергоэффективность и модернизация жилья',
+          cost: 25,
+          description: 'Теплоизоляция домов, энергоэффективные технологии и счётчики ресурсов.',
+          effects:     { environment: +0.7, income: +0.4, investment: +0.3 },
+          sideEffects: {}
+        },
+        {
+          id: 'green_public_spaces',
+          category: 'infra',
+          name: 'Зелёные общественные пространства',
+          cost: 20,
+          description: 'Создание зелёных зон, скверов и экотроп в городах и посёлках.',
+          effects:     { environment: +1.0, sport: +0.6, trust: +0.4 },
+          sideEffects: {}
+        },
+
+        // Экономика и цифровая трансформация (третья пятилетка)
+        {
+          id: 'innovation_grants_program',
+          category: 'economy',
+          name: 'Гранты на инновации и НИОКР',
+          cost: 30,
+          description: 'Поддержка технологических стартапов и НИОКР-проектов предприятий и университетов.',
+          effects:     { investment: +1.3, sme_income: +1.0, income: +0.6, digital: +0.8 },
+          sideEffects: {}
+        },
+        {
+          id: 'tourism_development_strategy',
+          category: 'economy',
+          name: 'Стратегия развития внутреннего туризма',
+          cost: 25,
+          description: 'Туристические маршруты, брендирование территорий, инфраструктура для путешествий внутри региона.',
+          effects:     { income: +0.8, sme_income: +1.0, population: +0.3 },
+          sideEffects: { environment: -0.3 }
+        },
+        {
+          id: 'import_substitution_industry',
+          category: 'economy',
+          name: 'Поддержка импортозамещающей промышленности',
+          cost: 35,
+          description: 'Льготы и госзаказ для предприятий, выпускающих критически важную продукцию.',
+          effects:     { investment: +1.1, income: +0.8, sme_income: +0.5 },
+          sideEffects: { environment: -0.4 }
+        },
+        {
+          id: 'ppp_infrastructure_program',
+          category: 'economy',
+          name: 'ГЧП в инфраструктурных проектах',
+          cost: 20,
+          description: 'Механизмы государственно-частного партнёрства для строительства дорог, школ, медцентров.',
+          effects:     { investment: +1.2, income: +0.4, trust: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'regional_brand_promotion',
+          category: 'economy',
+          name: 'Продвижение регионального бренда',
+          cost: 15,
+          description: 'Маркетинг региона, поддержка местных производителей и участие в выставках и форумах.',
+          effects:     { sme_income: +0.9, income: +0.5, trust: +0.4 },
+          sideEffects: {}
+        }
+      ];
+
+      const policiesPhase4 = [
+        // Социальная политика (четвёртая пятилетка)
+        {
+          id: 'demographic_strategy_2050',
+          category: 'social',
+          name: 'Долгосрочная демографическая стратегия до 2050 года',
+          cost: 30,
+          description: 'Комплексная система мер по поддержке семьи, рождаемости и качества жизни на долгосрочный период.',
+          effects:     { tfr: +0.05, poverty: -0.2, population: +0.3, trust: +0.4 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'universal_family_services',
+          category: 'social',
+          name: 'Единая служба поддержки семьи и детей',
+          cost: 35,
+          description: 'Интеграция всех мер поддержки семей с детьми в единую систему «одного окна».',
+          effects:     { tfr: +0.04, poverty: -0.5, trust: +0.5, population: +0.3 },
+          sideEffects: { investment: -0.3 }
+        },
+        {
+          id: 'social_rental_housing',
+          category: 'social',
+          name: 'Социальный арендный фонд жилья',
+          cost: 30,
+          description: 'Развитие муниципального арендного жилья для уязвимых групп и молодых семей.',
+          effects:     { poverty: -0.3, population: +0.2, trust: +0.3 },
+          sideEffects: { investment: -0.2 }
+        },
+        {
+          id: 'long_term_care_system',
+          category: 'social',
+          name: 'Система долговременного ухода',
+          cost: 25,
+          description: 'Развитие служб ухода за пожилыми и тяжело больными, поддержка семейных сиделок.',
+          effects:     { life: +0.4, poverty: -0.2, trust: +0.4 },
+          sideEffects: { investment: -0.1 }
+        },
+        {
+          id: 'managed_migration_policy',
+          category: 'social',
+          name: 'Управляемая миграционная политика',
+          cost: 20,
+          description: 'Привлечение востребованных специалистов и закрепление мигрантов в регионе.',
+          effects:     { population: +0.5, income: +0.4, sme_income: +0.3, trust: +0.1 },
+          sideEffects: { environment: -0.2 }
+        },
+
+        // Здравоохранение (четвёртая пятилетка)
+        {
+          id: 'personalized_prevention',
+          category: 'health',
+          name: 'Персонифицированная профилактика заболеваний',
+          cost: 25,
+          description: 'Индивидуальные программы профилактики с использованием цифровых профилей здоровья.',
+          effects:     { life: +0.6, sport: +0.6, digital: +0.5 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'hightech_medical_cluster',
+          category: 'health',
+          name: 'Высокотехнологичный медицинский кластер',
+          cost: 40,
+          description: 'Создание кластера высокотехнологичной медицины и биомедицины в регионе.',
+          effects:     { life: +0.8, investment: +0.5, income: +0.4, trust: +0.3 },
+          sideEffects: { environment: -0.2 }
+        },
+        {
+          id: 'rural_healthcare_upgrade',
+          category: 'health',
+          name: 'Второй этап модернизации сельского здравоохранения',
+          cost: 35,
+          description: 'Укрепление районных больниц, ФАПов и санавиации в сельских территориях.',
+          effects:     { life: +0.7, population: +0.3, trust: +0.4 },
+          sideEffects: { investment: -0.3 }
+        },
+        {
+          id: 'public_health_campaign',
+          category: 'health',
+          name: 'Масштабная кампания общественного здоровья',
+          cost: 15,
+          description: 'Долгосрочные программы по борьбе с курением, алкоголизацией и низкой физической активностью.',
+          effects:     { life: +0.4, sport: +0.5, poverty: -0.1 },
+          sideEffects: {}
+        },
+
+        // Образование и культура (четвёртая пятилетка)
+        {
+          id: 'teacher_professional_growth',
+          category: 'edu',
+          name: 'Профессиональный рост педагогов',
+          cost: 30,
+          description: 'Карьерные треки, наставничество и повышение статуса учителя.',
+          effects:     { education: +1.7, trust: +0.5, income: +0.3 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'digital_education_content',
+          category: 'edu',
+          name: 'Единая платформа цифрового образовательного контента',
+          cost: 25,
+          description: 'Создание библиотеки качественных цифровых курсов и учебных модулей.',
+          effects:     { education: +1.3, digital: +1.2, sme_income: +0.4 },
+          sideEffects: {}
+        },
+        {
+          id: 'adult_reskilling_centers',
+          category: 'edu',
+          name: 'Центры переобучения и повышения квалификации взрослых',
+          cost: 25,
+          description: 'Переобучение работников для новых отраслей экономики и сокращения структурной безработицы.',
+          effects:     { education: +1.4, income: +0.6, sme_income: +0.7, poverty: -0.2 },
+          sideEffects: {}
+        },
+        {
+          id: 'cultural_network_small_territories',
+          category: 'edu',
+          name: 'Культурные и общественные центры в малых территориях',
+          cost: 20,
+          description: 'Развитие сетей культурных центров, библиотек и общественных пространств в малых городах и сёлах.',
+          effects:     { education: +0.5, trust: +0.6, environment: +0.4, population: +0.2 },
+          sideEffects: {}
+        },
+
+        // Инфраструктура и среда (четвёртая пятилетка)
+        {
+          id: 'climate_adaptation_program',
+          category: 'infra',
+          name: 'Программа адаптации к изменению климата',
+          cost: 30,
+          description: 'Инфраструктура защиты от наводнений, засух, экстремальных температур и других климатических рисков.',
+          effects:     { environment: +1.3, life: +0.4, investment: +0.3, trust: +0.3 },
+          sideEffects: { income: -0.2 }
+        },
+        {
+          id: 'smart_energy_grid',
+          category: 'infra',
+          name: 'Интеллектуальные энергосети',
+          cost: 35,
+          description: 'Модернизация энергетической инфраструктуры, снижение потерь и повышение надёжности.',
+          effects:     { environment: +1.0, digital: +1.0, investment: +0.6, income: +0.4 },
+          sideEffects: {}
+        },
+        {
+          id: 'integrated_transport_hubs',
+          category: 'infra',
+          name: 'Интегрированные транспортно-логистические узлы',
+          cost: 30,
+          description: 'Создание мультимодальных транспортных узлов, увязка городского и регионального транспорта.',
+          effects:     { income: +0.6, investment: +0.7, environment: +0.3, sport: +0.2, population: +0.2 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'water_air_cleaning',
+          category: 'infra',
+          name: 'Современные системы очистки воды и воздуха',
+          cost: 25,
+          description: 'Комплексные проекты по очистке питьевой воды, стоков и снижению загрязнения воздуха.',
+          effects:     { environment: +1.5, life: +0.5, trust: +0.4 },
+          sideEffects: { investment: -0.2 }
+        },
+
+        // Экономика и цифровая трансформация (четвёртая пятилетка)
+        {
+          id: 'green_economy_transition',
+          category: 'economy',
+          name: 'Переход к «зелёной» экономике',
+          cost: 35,
+          description: 'Поддержка экологически чистых технологий, переработки и энергоэффективности.',
+          effects:     { investment: +1.1, environment: +0.9, sme_income: +0.8, income: +0.5 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'tax_system_simplification',
+          category: 'economy',
+          name: 'Упрощение и кодификация налоговой системы',
+          cost: 20,
+          description: 'Снижение административной нагрузки, прозрачные правила для бизнеса и граждан.',
+          effects:     { sme_income: +1.2, income: +0.6, investment: +0.5, trust: +0.3 },
+          sideEffects: {}
+        },
+        {
+          id: 'ai_for_state_and_business',
+          category: 'economy',
+          name: 'Искусственный интеллект для государства и бизнеса',
+          cost: 25,
+          description: 'Внедрение AI-решений в управлении, промышленности и сфере услуг.',
+          effects:     { digital: +2.0, income: +0.5, sme_income: +0.7, investment: +0.6 },
+          sideEffects: { poverty: +0.1 }
+        },
+        {
+          id: 'export_logistics_corridors',
+          category: 'economy',
+          name: 'Экспортно-логистические коридоры',
+          cost: 30,
+          description: 'Развитие транспортных коридоров для экспорта продукции региона.',
+          effects:     { income: +0.7, investment: +1.0, sme_income: +0.5, population: +0.2 },
+          sideEffects: { environment: -0.3 }
+        },
+        {
+          id: 'financial_inclusion_program',
+          category: 'economy',
+          name: 'Программа финансовой доступности',
+          cost: 20,
+          description: 'Расширение доступа населения и МСП к финансовым услугам, микрофинансирование и просвещение.',
+          effects:     { poverty: -0.3, income: +0.4, sme_income: +0.6, trust: +0.3 },
+          sideEffects: {}
+        }
+      ];
+
+      const policyPhases = [policiesPhase1, policiesPhase2, policiesPhase3, policiesPhase4];
+      let currentPhase = 1;
+      let activePolicies = policiesPhase1.slice();
+
+      let policiesMap = {};
+      activePolicies.forEach(p => { policiesMap[p.id] = p; });
 
       const budgetInfluence = {
         trust:      { social: +0.05, health: +0.02, edu: +0.02, infra: +0.01, economy: +0.01 },
@@ -2250,6 +2924,7 @@
       const yearsHint    = document.getElementById('yearsHint');
 
       const yearTimelineDiv = document.getElementById('yearTimeline');
+      const phaseTimelineDiv = document.getElementById('phaseTimeline');
 
       const eventCardDiv        = document.getElementById('eventCard');
       const eventYearLabel      = document.getElementById('eventYearLabel');
@@ -2293,7 +2968,7 @@
       }
       if (yearsHint) {
         yearsHint.textContent = 'Симуляция идёт с ' + startYear + ' по ' + endYear +
-          ' год (20 лет). В конце вы получите интегральную оценку по KPI и поддержке населения.';
+          ' год: 4 пятилетки по 5 лет. Цели KPI и набор мер обновляются каждые 5 лет.';
       }
 
       // ----- Инициализация -----
@@ -2401,7 +3076,7 @@
       function createPolicyPanel() {
         policyContainer.innerHTML = '';
         const groups = {};
-        policies.forEach(p => {
+        activePolicies.forEach(p => {
           if (!groups[p.category]) groups[p.category] = [];
           groups[p.category].push(p);
         });
@@ -2520,6 +3195,7 @@
           tr.appendChild(tdCurrent);
 
           const tdTarget = document.createElement('td');
+          tdTarget.id = 'metric-target-' + m.id;
           tdTarget.textContent = m.target;
           tdTarget.style.textAlign = 'right';
           tr.appendChild(tdTarget);
@@ -2541,6 +3217,16 @@
           tr.appendChild(tdInfluence);
 
           metricsTableBody.appendChild(tr);
+        });
+      }
+
+      function updateMetricsTargetsUI() {
+        metricsConfig.forEach(m => {
+          const td = document.getElementById('metric-target-' + m.id);
+          if (td) {
+            const val = Number.isInteger(m.target) ? m.target.toFixed(0) : m.target.toFixed(1);
+            td.textContent = val;
+          }
         });
       }
 
@@ -2698,6 +3384,88 @@
           else if (y === currentYear) step.classList.add('current');
           else step.classList.add('future');
         });
+      }
+
+      function renderPhaseTimeline() {
+        if (!phaseTimelineDiv) return;
+        phaseTimelineDiv.innerHTML = '';
+        policyPhases.forEach((_, idx) => {
+          const phaseNum = idx + 1;
+          const seg = document.createElement('div');
+          seg.className = 'phase-segment';
+          seg.dataset.phase = phaseNum;
+
+          const title = document.createElement('div');
+          title.textContent = phaseNum + '-я пятилетка';
+
+          const yearsLabel = document.createElement('div');
+          yearsLabel.className = 'phase-years';
+          const start = startYear + idx * 5;
+          const end = Math.min(endYear, start + 4);
+          yearsLabel.textContent = start + '–' + end;
+
+          seg.appendChild(title);
+          seg.appendChild(yearsLabel);
+          phaseTimelineDiv.appendChild(seg);
+        });
+        updatePhaseTimeline();
+      }
+
+      function updatePhaseTimeline() {
+        if (!phaseTimelineDiv) return;
+        phaseTimelineDiv.querySelectorAll('.phase-segment').forEach(seg => {
+          const phase = parseInt(seg.dataset.phase, 10);
+          seg.classList.toggle('active', phase === currentPhase);
+        });
+      }
+
+      function rebuildPoliciesMap() {
+        policiesMap = {};
+        activePolicies.forEach(p => { policiesMap[p.id] = p; });
+      }
+
+      function getPhaseForYear(year) {
+        const idx = Math.floor((year - startYear) / 5);
+        return clamp(idx + 1, 1, policyPhases.length);
+      }
+
+      function resetMetricsConfigToBase() {
+        metricsConfigBase.forEach((base, idx) => {
+          Object.assign(metricsConfig[idx], base);
+        });
+      }
+
+      function applyPhaseTargets(phase) {
+        const growFactor = 1 + 0.05 * (phase - 1);
+        const shrinkFactor = 1 - 0.05 * (phase - 1);
+        metricsConfig.forEach((m, idx) => {
+          const base = metricsConfigBase[idx];
+          if (!base) return;
+          m.target = base.inverted
+            ? Math.max(base.min, round1(base.target * shrinkFactor))
+            : Math.min(base.max, round1(base.target * growFactor));
+        });
+        updateMetricsTargetsUI();
+      }
+
+      function updateYearsHint() {
+        if (!yearsHint) return;
+        const phaseStart = startYear + (currentPhase - 1) * 5;
+        const phaseEnd = Math.min(endYear, phaseStart + 4);
+        yearsHint.textContent = 'Симуляция идёт с ' + startYear + ' по ' + endYear +
+          ' год (4 пятилетки по 5 лет). Сейчас ' + currentPhase + '-я пятилетка (' + phaseStart + '–' + phaseEnd +
+          '): цели KPI повышаются, а список мер обновляется.';
+      }
+
+      function setPhase(phase) {
+        currentPhase = clamp(phase, 1, policyPhases.length);
+        activePolicies = policyPhases[currentPhase - 1].slice();
+        rebuildPoliciesMap();
+        createPolicyPanel();
+        clearSelectedPolicies();
+        applyPhaseTargets(currentPhase);
+        updatePhaseTimeline();
+        updateYearsHint();
       }
 
       function initChartsIfNeeded() {
@@ -3369,11 +4137,13 @@
         investmentShareInput.value = (defaultBudgetShares.investment ?? 0);
         investmentHorizonSel.value = 3;
 
+        resetMetricsConfigToBase();
         initMetrics();
         initBudgetInputs();
-        createPolicyPanel();
-        clearSelectedPolicies();
+        renderPhaseTimeline();
+        setPhase(1);
         buildMetricsTable();
+        updateMetricsTargetsUI();
         initChartsIfNeeded();
         history = [];
 
@@ -3648,6 +4418,14 @@
         currentYear += 1;
         yearLabel.textContent = currentYear.toString();
         updateTimeline();
+
+        const newPhase = getPhaseForYear(currentYear);
+        if (newPhase !== currentPhase) {
+          setPhase(newPhase);
+        } else {
+          updatePhaseTimeline();
+          updateYearsHint();
+        }
 
         const score = computeOverallScore();
         history.push({ year: currentYear, score, support: publicSupportIndex });

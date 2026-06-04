@@ -1,0 +1,12 @@
+{
+  "name": "government-budget-simulator-i18n-qa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:i18n": "playwright test tests/i18n.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.0"
+  }
+}

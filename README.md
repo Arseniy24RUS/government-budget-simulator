@@ -16,6 +16,16 @@
 
 The simulator is designed for courses in public administration, regional policy, strategic planning, budget process and policy analysis. It demonstrates that public management is not a sequence of isolated decisions but a system of trade-offs between fiscal capacity, social expectations, demographic dynamics, infrastructure, investment and political legitimacy.
 
+### Visual overview
+
+![English hero overview](assets/visuals/hero-en.png)
+
+![English scenario walkthrough](assets/visuals/scenario-en.gif)
+
+| Architecture | Methodology |
+| --- | --- |
+| ![English architecture diagram](assets/visuals/architecture-en.svg) | ![English methodology diagram](assets/visuals/methodology-en.svg) |
+
 ### Live simulator
 
 GitHub Pages: <https://arseniy24rus.github.io/government-budget-simulator/>
@@ -89,6 +99,16 @@ Unless otherwise stated, source code is released under the MIT License. Educatio
 `government-budget-simulator` — учебный браузерный симулятор регионального государственного управления. Игрок выступает в роли губернатора и принимает управленческие решения на протяжении 20-летнего периода, одновременно удерживая бюджетные ограничения, социально-экономические показатели, общественную поддержку и долгосрочные цели развития региона.
 
 Симулятор предназначен для курсов по государственному и муниципальному управлению, региональной политике, стратегическому планированию, бюджетному процессу и анализу публичной политики. Он показывает, что государственное управление — это не набор изолированных решений, а система компромиссов между финансовыми возможностями, социальными ожиданиями, демографической динамикой, инфраструктурой, инвестициями и политической легитимностью.
+
+### Визуальный обзор
+
+![Русский визуальный обзор](assets/visuals/hero-ru.png)
+
+![Русский сценарий прохождения](assets/visuals/scenario-ru.gif)
+
+| Архитектура | Методология |
+| --- | --- |
+| ![Русская схема архитектуры](assets/visuals/architecture-ru.svg) | ![Русская схема методологии](assets/visuals/methodology-ru.svg) |
 
 ### Публичный симулятор
 

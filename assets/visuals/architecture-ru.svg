@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">Архитектура симуляционного цикла</title>
+  <desc id="desc">Путь от состояния сценария к видимым учебным результатам.</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#0f172a" flood-opacity="0.13"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+      <path d="M2,2 L10,6 L2,10 Z" fill="#64748b"/>
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .grid { stroke: #dbe4ef; stroke-width: 1; opacity: .75; }
+      .box { fill: #ffffff; stroke: #d8e2ef; stroke-width: 2; filter: url(#shadow); }
+      .title { font: 700 22px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .body { font: 400 17px 'Segoe UI', Arial, sans-serif; fill: #526071; }
+      .heading { font: 800 34px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 19px 'Segoe UI', Arial, sans-serif; fill: #526071; }
+      .chip { font: 700 17px 'Segoe UI', Arial, sans-serif; fill: #0f172a; }
+      .arrow { stroke: #64748b; stroke-width: 4; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect class="bg" width="1200" height="520"/>
+  <path class="grid" d="M0 440H1200M0 350H1200M0 260H1200M0 170H1200M0 80H1200"/>
+  <path class="grid" d="M120 0V520M300 0V520M480 0V520M660 0V520M840 0V520M1020 0V520"/>
+  <text class="heading" x="70" y="72">Архитектура симуляционного цикла</text>
+  <text class="subtitle" x="70" y="106">Путь от состояния сценария к видимым учебным результатам.</text>
+<rect class="box" x="70" y="165" width="220" height="170" rx="18"/>
+<rect x="70" y="165" width="220" height="8" rx="4" fill="#2563eb"/>
+<text class="title" x="94" y="203">Состояние сценария</text>
+<text class="body" x="94" y="243">Год, сценарий, бюджет,</text>
+<text class="body" x="94" y="267">базовые KPI и поддержка</text>
+<text class="body" x="94" y="291">групп.</text>
+<path class="arrow" d="M310 250.0 H322"/>
+<rect class="box" x="350" y="165" width="220" height="170" rx="18"/>
+<rect x="350" y="165" width="220" height="8" rx="4" fill="#f59e0b"/>
+<text class="title" x="374" y="203">Решения студента</text>
+<text class="body" x="374" y="243">Распределение бюджета,</text>
+<text class="body" x="374" y="267">налоги, инвестиции, ответ на</text>
+<text class="body" x="374" y="291">событие, меры.</text>
+<path class="arrow" d="M590 250.0 H602"/>
+<rect class="box" x="630" y="165" width="220" height="170" rx="18"/>
+<rect x="630" y="165" width="220" height="8" rx="4" fill="#16a34a"/>
+<text class="title" x="654" y="203">Движок событий</text>
+<text class="body" x="654" y="243">Годовые события и</text>
+<text class="body" x="654" y="267">долгосрочные ситуации меняют</text>
+<text class="body" x="654" y="291">показатели.</text>
+<path class="arrow" d="M870 250.0 H882"/>
+<rect class="box" x="910" y="165" width="220" height="170" rx="18"/>
+<rect x="910" y="165" width="220" height="8" rx="4" fill="#dc2626"/>
+<text class="title" x="934" y="203">Результаты</text>
+<text class="body" x="934" y="243">KPI, общественная поддержка,</text>
+<text class="body" x="934" y="267">графики и таблица лидеров.</text>
+<rect x="70" y="396" width="130" height="42" rx="21" fill="#dbeafe" stroke="#93c5fd"/>
+<text class="chip" x="92" y="423">KPI</text>
+<rect x="218" y="396" width="150" height="42" rx="21" fill="#dcfce7" stroke="#86efac"/>
+<text class="chip" x="240" y="423">Поддержка</text>
+<rect x="386" y="396" width="222" height="42" rx="21" fill="#ffedd5" stroke="#fdba74"/>
+<text class="chip" x="408" y="423">Таблица лидеров</text>
+</svg>

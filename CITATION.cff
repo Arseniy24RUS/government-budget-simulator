@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "If you use this repository, please cite it as below."
+type: software
+title: "Government Budget Simulator: regional governance and public policy game"
+authors:
+  - family-names: "Sitkovskiy"
+    given-names: "Arseniy"
+year: 2026
+license: MIT
+repository-code: "https://github.com/Arseniy24RUS/government-budget-simulator"
+url: "https://arseniy24rus.github.io/government-budget-simulator/"

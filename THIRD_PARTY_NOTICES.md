@@ -1,4 +1,4 @@
-# Third-Party Notices
+﻿# Third-Party Notices
 
 This repository combines original educational code/content with third-party libraries, public web services, and institutional references. Unless a third-party item is explicitly stated to be original project content, it is not relicensed by the MIT or CC BY 4.0 licenses in this repository.
 
@@ -25,7 +25,7 @@ When adapting the simulator for another region, course, or institution, replace 
 
 ## Project Visual Assets
 
-The visual overview assets under `assets/visuals/` are treated as repository content unless a future notice states otherwise. They are covered by `LICENSE-DOCS-AND-DATA.md`, except for any embedded third-party marks or official symbols.
+The visual overview assets under `assets/visuals/` are treated as repository content unless a future notice states otherwise. They are covered by `docs/license-docs-and-data.md`, except for any embedded third-party marks or official symbols.
 
 ## No Endorsement
 

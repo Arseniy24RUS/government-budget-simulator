@@ -1,4 +1,4 @@
-# Government Budget Simulator · Regional Governance and Public Policy Game
+﻿# Government Budget Simulator · Regional Governance and Public Policy Game
 
 [English](#english) · [Русский](#русский)
 
@@ -93,7 +93,7 @@ If you use the simulator in teaching, research or public presentations, please c
 | Material | License / terms |
 | --- | --- |
 | Source code | [MIT](LICENSE) |
-| Documentation, data-like configuration, educational content, scenarios and diagrams | [CC BY 4.0](LICENSE-DOCS-AND-DATA.md) |
+| Documentation, data-like configuration, educational content, scenarios and diagrams | [CC BY 4.0](docs/license-docs-and-data.md) |
 | Third-party libraries, services, official names, logos, emblems and other external materials | Original third-party terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
 
 ---
@@ -183,5 +183,5 @@ python -m http.server 8000
 | Материал | Лицензия / условия |
 | --- | --- |
 | Исходный код | [MIT](LICENSE) |
-| Документация, данные/конфигурация, учебное содержание, сценарии и схемы | [CC BY 4.0](LICENSE-DOCS-AND-DATA.md) |
+| Документация, данные/конфигурация, учебное содержание, сценарии и схемы | [CC BY 4.0](docs/license-docs-and-data.md) |
 | Сторонние библиотеки, сервисы, официальные названия, логотипы, эмблемы и другие внешние материалы | Исходные условия правообладателей; см. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |

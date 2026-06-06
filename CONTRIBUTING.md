@@ -1,4 +1,4 @@
-# Contributing
+﻿# Contributing
 
 Thank you for improving `government-budget-simulator`. This project is an educational simulator, so contributions should keep the model transparent, discussable, and easy to run locally.
 
@@ -51,7 +51,7 @@ User-facing documentation should be useful in both English and Russian when the 
 - The change is scoped to this repository.
 - README changes are minimal unless the PR is documentation-only.
 - Methodology changes are reflected in `docs/methodology.md`.
-- Licensing implications are checked against `LICENSE`, `LICENSE-DOCS-AND-DATA.md`, and `THIRD_PARTY_NOTICES.md`.
+- Licensing implications are checked against `LICENSE`, `docs/license-docs-and-data.md`, and `THIRD_PARTY_NOTICES.md`.
 - Local tests are run and results are reported.
 
 ## Русский

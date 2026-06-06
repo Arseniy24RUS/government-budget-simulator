@@ -30,6 +30,8 @@ The simulator is designed for courses in public administration, regional policy,
 
 GitHub Pages: <https://arseniy24rus.github.io/government-budget-simulator/>
 
+Methodology and model assumptions: [docs/methodology.md](docs/methodology.md)
+
 ### Gameplay model
 
 The simulation consists of 20 annual turns. At the beginning, the player selects one of six starting scenarios: baseline development, demographic decline, environmental crisis, population ageing, digital transformation or economic crisis. During the game, the player encounters annual events, long-term regional situations and decision windows across several policy periods.
@@ -88,7 +90,11 @@ If you use the simulator in teaching, research or public presentations, please c
 
 ### License
 
-Unless otherwise stated, source code is released under the MIT License. Educational content, text, scenarios and documentation are released under Creative Commons Attribution 4.0 International (CC BY 4.0). Third-party libraries and services are governed by their own licenses and terms.
+| Material | License / terms |
+| --- | --- |
+| Source code | [MIT](LICENSE) |
+| Documentation, data-like configuration, educational content, scenarios and diagrams | [CC BY 4.0](LICENSE-DOCS-AND-DATA.md) |
+| Third-party libraries, services, official names, logos, emblems and other external materials | Original third-party terms; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
 
 ---
 
@@ -113,6 +119,8 @@ Unless otherwise stated, source code is released under the MIT License. Educatio
 ### Публичный симулятор
 
 GitHub Pages: <https://arseniy24rus.github.io/government-budget-simulator/>
+
+Методология и предпосылки модели: [docs/methodology.md](docs/methodology.md)
 
 ### Игровая модель
 
@@ -172,4 +180,8 @@ python -m http.server 8000
 
 ### Лицензия
 
-Если явно не указано иное, исходный код распространяется по лицензии MIT. Учебное содержание, тексты, сценарии и документация распространяются по лицензии Creative Commons Attribution 4.0 International (CC BY 4.0). Сторонние библиотеки и сервисы регулируются собственными лицензиями и условиями использования.
+| Материал | Лицензия / условия |
+| --- | --- |
+| Исходный код | [MIT](LICENSE) |
+| Документация, данные/конфигурация, учебное содержание, сценарии и схемы | [CC BY 4.0](LICENSE-DOCS-AND-DATA.md) |
+| Сторонние библиотеки, сервисы, официальные названия, логотипы, эмблемы и другие внешние материалы | Исходные условия правообладателей; см. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) |
